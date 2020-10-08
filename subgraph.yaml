@@ -18,7 +18,7 @@ dataSources:
         - OwnershipChanged
       abis:
         - name: IdeaToken
-          file: ./build/abis/IdeaToken.json
+          file: ./res/abis/IdeaToken.json
       eventHandlers:
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
@@ -44,7 +44,7 @@ dataSources:
         - OwnershipChanged
       abis:
         - name: IdeaTokenFactory
-          file: ./build/abis/IdeaTokenFactory.json
+          file: ./res/abis/IdeaTokenFactory.json
       eventHandlers:
         - event: NewMarket(uint256,string)
           handler: handleNewMarket

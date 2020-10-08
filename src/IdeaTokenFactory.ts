@@ -3,7 +3,7 @@ import {
   NewMarket,
   NewToken,
   OwnershipChanged
-} from '../build/generated/IdeaTokenFactory/IdeaTokenFactory'
+} from '../res/generated/IdeaTokenFactory/IdeaTokenFactory'
 
 export function handleNewMarket(event: NewMarket): void {
 }

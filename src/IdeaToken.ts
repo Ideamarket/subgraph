@@ -3,8 +3,8 @@ import {
   Transfer,
   Approval,
   OwnershipChanged
-} from '../build/generated/IdeaToken/IdeaToken'
-import { IdeaToken, IdeaTokenBalance, IdeaTokenAllowance } from '../build/generated/schema'
+} from '../res/generated/IdeaToken/IdeaToken'
+import { IdeaToken, IdeaTokenBalance, IdeaTokenAllowance } from '../res/generated/schema'
 
 const zeroAddress = Address.fromHexString('0x0000000000000000000000000000000000000000')
 

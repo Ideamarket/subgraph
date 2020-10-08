@@ -2,7 +2,7 @@ const fs = require("fs")
 const { exec } = require("child_process")
 const path = require('path')
 
-const buildDir = './build'
+const buildDir = './res'
 const abiDir = './abis'
 
 const contracts = [
@@ -94,7 +94,7 @@ async function main() {
     if(process.platform === "win32") {
         graphCmd += '.cmd'
     }
-    executeCmd(graphCmd + ' codegen --output-dir ' + path.normalize('build/generated'))
+    executeCmd(graphCmd + ' codegen --output-dir ' + path.normalize(buildDir + '/generated'))
 }
 
 function cleanDirectory(dir) {
