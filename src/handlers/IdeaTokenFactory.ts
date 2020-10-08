@@ -5,7 +5,7 @@ import {
   NewToken,
   OwnershipChanged
 } from '../../build/generated/autogen_IdeaTokenFactory'
-import { ExampleEntity } from '../generated/schema'
+import { ExampleEntity } from '../entities/schema'
 
 export function handleNewMarket(event: NewMarket): void {
   // Entities can be loaded from the store using a string ID; this ID
