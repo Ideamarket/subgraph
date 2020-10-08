@@ -24,7 +24,11 @@ async function main() {
     process.chdir(buildDir)
     if (!fs.existsSync('./ideamarket')) {
         console.log('> Cloning ideamarket repository')
-        await executeCmd('git clone https://github.com/ideamarket/ideamarket.git ideamarket')
+        if(process.env.IDEAMARKET_CLONE_TOKEN) {
+            await executeCmd('git clone https://' + process.env.IDEAMARKET_CLONE_TOKEN + '@github.com/ideamarket/ideamarket.git ideamarket')
+        } else {
+            await executeCmd('git clone https://github.com/ideamarket/ideamarket.git ideamarket')
+        }
     } else {
         console.log('> Ideamarket repository exists')
     }
