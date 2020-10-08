@@ -13,6 +13,7 @@ jobs:
       - name: Install dependencies
         run: |
             npm install
+            npm install -g truffle
             npm install -g @graphprotocol/graph-cli
       - name: Run build
         run: |
