@@ -1,16 +1,16 @@
 const fs = require("fs")
-const { exec, spawn } = require("child_process")
+const { exec } = require("child_process")
 const path = require('path')
 
 const buildDir = './build'
 const abiDir = './abis'
 
 const contracts = [
+    'IdeaToken',
     'IdeaTokenFactory'
 ]
 
 async function main() {
-
     // Create build dir if it does not exist
     if (!fs.existsSync(buildDir)) {
         console.log('> Creating build directory')

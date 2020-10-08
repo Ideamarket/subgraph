@@ -1,8 +1,24 @@
-"============================== IdeaTokenFactory =============================="
-
-type TokenInfo @entity {
-  exists: Boolean!
+type IdeaTokenBalance @entity {
+  "<account address>-<token address>"
   id: ID!
+  amount: BigInt!
+  token: IdeaToken!
+}
+
+type IdeaTokenAllowance @entity {
+  "<owner address>-<spender address>-<token address>"
+  id: ID!
+  amount: BigInt!
+  token: IdeaToken!
+}
+
+type IdeaToken @entity {
+  "<token address>"
+  id: ID!
+  tokenID: BigInt!
   name: String!
-  ideaToken: Bytes!
+  supply: BigInt!
+  owner: Bytes!
+  balances: [IdeaTokenBalance!]! @derivedFrom(field: "token")
+  allowances: [IdeaTokenAllowance!]! @derivedFrom(field: "token")
 }

@@ -1,26 +1,31 @@
 import { BigInt } from '@graphprotocol/graph-ts'
 import {
-  Contract,
   NewMarket,
   NewToken,
   OwnershipChanged
 } from '../build/generated/IdeaTokenFactory/IdeaTokenFactory'
-import { ExampleEntity } from '../build/generated/schema'
 
 export function handleNewMarket(event: NewMarket): void {
+}
+
+export function handleNewToken(event: NewToken): void {}
+
+export function handleOwnershipChanged(event: OwnershipChanged): void {}
+
+
+/*
   // Entities can be loaded from the store using a string ID; this ID
   // needs to be unique across all entities of the same type
-  let entity = ExampleEntity.load(event.transaction.from.toHex())
+  let entity = TokenInfo.load(event.id.toHex())
 
   // Entities only exist after they have been saved to the store;
   // `null` checks allow to create entities on demand
   if (entity == null) {
-    entity = new ExampleEntity(event.transaction.from.toHex())
-
-    // Entity fields can be set using simple assignments
-    entity.count = BigInt.fromI32(0)
+    entity = new TokenInfo(event.id.toHex())
   }
 
+
+  
   // BigInt and BigDecimal math are supported
   entity.count = entity.count + BigInt.fromI32(1)
 
@@ -55,8 +60,4 @@ export function handleNewMarket(event: NewMarket): void {
   // - contract.getTokenIDByName(...)
   // - contract.getTokenInfo(...)
   // - contract.getTokenIDPair(...)
-}
-
-export function handleNewToken(event: NewToken): void {}
-
-export function handleOwnershipChanged(event: OwnershipChanged): void {}
+  */

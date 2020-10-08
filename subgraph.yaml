@@ -2,6 +2,32 @@ specVersion: 0.0.2
 schema:
   file: ./schema.graphql
 dataSources:
+  # ============================== IdeaToken ==============================
+  - kind: ethereum/contract
+    name: IdeaToken
+    network: mainnet # Todo 
+    source:
+      abi: IdeaToken
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Transfer
+        - Approval
+        - OwnershipChanged
+      abis:
+        - name: IdeaToken
+          file: ./build/abis/IdeaToken.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+        - event: Approval(indexed address,indexed address,uint256)
+          handler: handleApproval
+        - event: OwnershipChanged(address,address)
+          handler: handleOwnershipChanged
+      file: ./src/IdeaToken.ts
+  # ============================== IdeaTokenFactory ==============================
   - kind: ethereum/contract
     name: IdeaTokenFactory
     network: mainnet # Todo 
@@ -22,7 +48,7 @@ dataSources:
       eventHandlers:
         - event: NewMarket(uint256,string)
           handler: handleNewMarket
-        - event: NewToken(uint256,uint256,string)
+        - event: NewToken(uint256,uint256,string,address)
           handler: handleNewToken
         - event: OwnershipChanged(address,address)
           handler: handleOwnershipChanged
