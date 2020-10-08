@@ -7,7 +7,7 @@ dataSources:
     network: mainnet # Todo 
     source:
       address: "0x5a0b54d5dc17e0aadc383d2db43b0a0d3e029c4c" # Todo 
-      abi: IdeaTokenFactoryABI
+      abi: IdeaTokenFactory
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -17,7 +17,7 @@ dataSources:
         - NewToken
         - OwnershipChanged
       abis:
-        - name: IdeaTokenFactoryABI
+        - name: IdeaTokenFactory
           file: ./build/abis/IdeaTokenFactory.json
       eventHandlers:
         - event: NewMarket(uint256,string)
@@ -26,4 +26,4 @@ dataSources:
           handler: handleNewToken
         - event: OwnershipChanged(address,address)
           handler: handleOwnershipChanged
-      file: ./src/handlers/IdeaTokenFactory.ts
+      file: ./src/IdeaTokenFactory.ts

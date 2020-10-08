@@ -4,7 +4,6 @@ const path = require('path')
 
 const buildDir = './build'
 const abiDir = './abis'
-const generatedDir = './generated'
 
 const contracts = [
     'IdeaTokenFactory'
@@ -80,62 +79,23 @@ async function main() {
     })
 
     // Generate autogen files
+    process.chdir('..')
+    
+    if(fs.existsSync('generated')) {
+        deleteDirectory('generated')
+    }
+
+    if(fs.existsSync(path.join(buildDir, 'generated'))) {
+        deleteDirectory(path.join(buildDir, 'generated'))
+    }
+
     console.log('> Generating autogen files')
-
-    if (!fs.existsSync(generatedDir)) {
-        console.log('> Creating generated directory')
-        fs.mkdirSync(generatedDir)
-    } else {
-        console.log('> Cleaning old autogen files')
-        cleanDirectory(generatedDir)
+    let graphCmd = 'graph'
+    if(process.platform === "win32") {
+        graphCmd += '.cmd'
     }
-
-    const promises = []
-    for(let i = 0; i < contracts.length; i++) {
-        const contract = contracts[i]
-        promises.push(new Promise(async (resolve, reject) => {
-            const dir = 'autogen_' + contract
-
-            if(fs.existsSync(dir)) {
-                deleteDirectory(dir)
-            }
-
-            const abiPath = path.normalize('./abis/'+ contract + '.json')
-
-            let graphCmd = 'graph'
-            if(process.platform === "win32") {
-                graphCmd += '.cmd'
-            }
-            const child = spawn(graphCmd, ['init', '--from-contract', '0x0000000000000000000000000000000000000000', '--network', 'mainnet', '--abi', abiPath, dir + '/' + dir])
-            child.stdin.setEncoding('utf-8')
-            //child.stdout.pipe(process.stdout)
-            child.stdin.write('\n') // Name
-            await sleep(1500)
-            child.stdin.write('\n') // Directory
-            await sleep(1500)
-            child.stdin.write('\n') // Network
-            await sleep(1500)
-            child.stdin.write('0x0000000000000000000000000000000000000000\n') // Address
-            await sleep(1500)
-            child.stdin.write('\n') // ABI file path
-            child.stdin.end()
-            
-            child.on('exit', () => {
-                fs.copyFileSync(path.join(dir, 'generated/Contract/Contract.ts'), 'generated/autogen_' + contract + '.ts')
-                console.log('> Done: ' + contract)
-                resolve()
-            })
-        }))
-    }
-
-    await Promise.all(promises)
+    executeCmd(graphCmd + ' codegen --output-dir ' + path.normalize('build/generated'))
 }
-
-function sleep(ms) {
-    return new Promise((resolve) => {
-      setTimeout(resolve, ms);
-    })
-}   
 
 function cleanDirectory(dir) {
     if (fs.existsSync(dir)) {

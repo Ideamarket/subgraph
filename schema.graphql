@@ -1,6 +1,8 @@
-type ExampleEntity @entity {
+"============================== IdeaTokenFactory =============================="
+
+type TokenInfo @entity {
+  exists: Boolean!
   id: ID!
-  count: BigInt!
-  id: BigInt! # uint256
-  name: String! # string
+  name: String!
+  ideaToken: Bytes!
 }
