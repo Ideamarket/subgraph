@@ -117,7 +117,7 @@ async function main() {
             child.stdin.end()
             
             child.on('exit', () => {
-                fs.copyFileSync(path.join(dir, 'generated/Contract/Contract.ts'), 'generated/' + contract + '.ts')
+                fs.copyFileSync(path.join(dir, 'generated/Contract/Contract.ts'), 'generated/autogen_' + contract + '.ts')
                 console.log('> Done: ' + contract)
                 resolve()
             })
