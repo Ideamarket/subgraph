@@ -1,11 +1,11 @@
-import { BigInt } from "@graphprotocol/graph-ts"
+import { BigInt } from '@graphprotocol/graph-ts'
 import {
   Contract,
   NewMarket,
   NewToken,
   OwnershipChanged
-} from "../generated/Contract/Contract"
-import { ExampleEntity } from "../generated/schema"
+} from '../../build/generated/autogen_IdeaTokenFactory'
+import { ExampleEntity } from '../generated/schema'
 
 export function handleNewMarket(event: NewMarket): void {
   // Entities can be loaded from the store using a string ID; this ID
