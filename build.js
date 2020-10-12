@@ -4,6 +4,7 @@ const path = require('path')
 
 const buildDir = './res'
 const abiDir = './abis'
+const contractsRepo = 'github.com/ideamarket/ideamarket-contracts.git'
 
 const contracts = [
     'IdeaToken',
@@ -24,9 +25,9 @@ async function main() {
     if (!fs.existsSync('./ideamarket')) {
         console.log('> Cloning ideamarket repository')
         if(process.env.IDEAMARKET_CLONE_TOKEN) {
-            await executeCmd('git clone https://' + process.env.IDEAMARKET_CLONE_TOKEN + '@github.com/ideamarket/ideamarket.git ideamarket')
+            await executeCmd('git clone https://' + process.env.IDEAMARKET_CLONE_TOKEN + '@' + contractsRepo + ' ideamarket')
         } else {
-            await executeCmd('git clone https://github.com/ideamarket/ideamarket.git ideamarket')
+            await executeCmd('git clone https://' + contractsRepo + ' ideamarket')
         }
     } else {
         console.log('> Ideamarket repository exists')
