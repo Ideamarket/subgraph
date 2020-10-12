@@ -6,10 +6,10 @@ import {
 } from '../res/generated/IdeaToken/IdeaToken'
 import { IdeaToken, IdeaTokenBalance, IdeaTokenAllowance } from '../res/generated/schema'
 
-const zeroAddress = Address.fromHexString('0x0000000000000000000000000000000000000000')
+let zeroAddress = Address.fromHexString('0x0000000000000000000000000000000000000000')
 
 export function handleTransfer(event: Transfer): void {
-    const token = IdeaToken.load(event.address.toHex())
+    let token = IdeaToken.load(event.address.toHex())
     if(!token) {
         throw 'IdeaToken does not exist on Transfer event'
     }
@@ -17,7 +17,7 @@ export function handleTransfer(event: Transfer): void {
     if(event.params.from.equals(zeroAddress)) {
         token.supply = token.supply.plus(event.params.value)
     } else {
-        const fromBalance = IdeaTokenBalance.load(event.params.from.toHex() + '-' + token.id)
+        let fromBalance = IdeaTokenBalance.load(event.params.from.toHex() + '-' + token.id)
         if (!fromBalance) {
             throw 'FromBalance is not defined on Transfer event'
         }
@@ -37,7 +37,7 @@ export function handleTransfer(event: Transfer): void {
             toBalance = new IdeaTokenBalance(event.params.to.toHex())
             toBalance.amount = BigInt.fromI32(0)
         }
-        const beforeBalance = toBalance.amount
+        let beforeBalance = toBalance.amount
         toBalance.amount = toBalance.amount.plus(event.params.value)
         toBalance.save()
 
@@ -50,12 +50,12 @@ export function handleTransfer(event: Transfer): void {
 }
 
 export function handleApproval(event: Approval): void {
-    const token = IdeaToken.load(event.address.toHex())
+    let token = IdeaToken.load(event.address.toHex())
     if(!token) {
         throw 'IdeaToken does not exist on Approve event'
     }
 
-    const allowanceID = event.params.owner.toHex() + '-' + event.params.spender.toHex() + '-' + token.id
+    let allowanceID = event.params.owner.toHex() + '-' + event.params.spender.toHex() + '-' + token.id
     let allowance = IdeaTokenAllowance.load(allowanceID)
     if(!allowance) {
         allowance = new IdeaTokenAllowance(allowanceID)
@@ -67,7 +67,7 @@ export function handleApproval(event: Approval): void {
 }
 
 export function handleOwnershipChanged(event: OwnershipChanged): void {
-    const token = IdeaToken.load(event.address.toHex())
+    let token = IdeaToken.load(event.address.toHex())
     if(!token) {
         throw 'IdeaToken does not exist on OwnershipChanged event'
     }

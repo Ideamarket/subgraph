@@ -8,7 +8,8 @@ const contractsRepo = 'github.com/ideamarket/ideamarket-contracts.git'
 
 const contracts = [
     'IdeaToken',
-    'IdeaTokenFactory'
+    'IdeaTokenFactory',
+    'IdeaTokenExchange'
 ]
 
 async function main() {

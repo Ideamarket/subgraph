@@ -21,6 +21,7 @@ type IdeaToken @entity {
   name: String!
   supply: BigInt!
   holders: Int!
+  marketCap: BigInt!
   owner: Bytes!
   balances: [IdeaTokenBalance!]! @derivedFrom(field: "token")
   allowances: [IdeaTokenAllowance!]! @derivedFrom(field: "token")
