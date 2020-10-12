@@ -23,6 +23,10 @@ export function handleTransfer(event: Transfer): void {
         }
         fromBalance.amount = fromBalance.amount.minus(event.params.value)
         fromBalance.save()
+
+        if(fromBalance.amount.equals(BigInt.fromI32(0))) {
+            token.holders = token.holders - 1
+        }
     }
 
     if(event.params.to.equals(zeroAddress)) {
@@ -33,8 +37,13 @@ export function handleTransfer(event: Transfer): void {
             toBalance = new IdeaTokenBalance(event.params.to.toHex())
             toBalance.amount = BigInt.fromI32(0)
         }
+        const beforeBalance = toBalance.amount
         toBalance.amount = toBalance.amount.plus(event.params.value)
         toBalance.save()
+
+        if(beforeBalance.equals(BigInt.fromI32(0)) && !toBalance.amount.equals(BigInt.fromI32(0))) {
+            token.holders = token.holders + 1
+        }
     }
 
     token.save()

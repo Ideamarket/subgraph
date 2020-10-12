@@ -1,3 +1,5 @@
+"============================================================ TOKEN ============================================================" 
+
 type IdeaTokenBalance @entity {
   "<account address>-<token address>"
   id: ID!
@@ -15,9 +17,10 @@ type IdeaTokenAllowance @entity {
 type IdeaToken @entity {
   "<token address>"
   id: ID!
-  tokenID: BigInt!
+  tokenID: Int!
   name: String!
   supply: BigInt!
+  holders: Int!
   owner: Bytes!
   balances: [IdeaTokenBalance!]! @derivedFrom(field: "token")
   allowances: [IdeaTokenAllowance!]! @derivedFrom(field: "token")
