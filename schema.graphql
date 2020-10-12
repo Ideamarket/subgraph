@@ -1,3 +1,17 @@
+"============================================================ MARKET ===========================================================" 
+type IdeaMarket @entity {
+  "<market id>"
+  id: ID!
+  marketID: Int!
+  name: String!
+  baseCost: BigInt!
+  priceRise: BigInt!
+  tokensPerInterval: BigInt!
+  tradingFeeRate: BigInt!
+  platformFeeRate: BigInt!
+  tokens: [IdeaToken!]! @derivedFrom(field: "market")
+}
+
 "============================================================ TOKEN ============================================================" 
 
 type IdeaTokenBalance @entity {
@@ -18,6 +32,7 @@ type IdeaToken @entity {
   "<token address>"
   id: ID!
   tokenID: Int!
+  market: IdeaMarket!
   name: String!
   supply: BigInt!
   holders: Int!

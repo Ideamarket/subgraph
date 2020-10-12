@@ -6,7 +6,7 @@ import {
 } from '../res/generated/IdeaToken/IdeaToken'
 import { IdeaToken, IdeaTokenBalance, IdeaTokenAllowance } from '../res/generated/schema'
 
-let zeroAddress = Address.fromHexString('0x0000000000000000000000000000000000000000')
+let zeroAddress = Address.fromString('0x0000000000000000000000000000000000000000')
 
 export function handleTransfer(event: Transfer): void {
     let token = IdeaToken.load(event.address.toHex())
@@ -35,6 +35,7 @@ export function handleTransfer(event: Transfer): void {
         let toBalance = IdeaTokenBalance.load(event.params.to.toHex() + '-' + token.id)
         if (!toBalance) {
             toBalance = new IdeaTokenBalance(event.params.to.toHex())
+            toBalance.token = token.id
             toBalance.amount = BigInt.fromI32(0)
         }
         let beforeBalance = toBalance.amount
@@ -59,6 +60,7 @@ export function handleApproval(event: Approval): void {
     let allowance = IdeaTokenAllowance.load(allowanceID)
     if(!allowance) {
         allowance = new IdeaTokenAllowance(allowanceID)
+        allowance.token = token.id
         allowance.amount = BigInt.fromI32(0)
     }
 
