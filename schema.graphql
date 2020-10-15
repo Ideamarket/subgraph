@@ -41,3 +41,10 @@ type IdeaToken @entity {
   balances: [IdeaTokenBalance!]! @derivedFrom(field: "token")
   allowances: [IdeaTokenAllowance!]! @derivedFrom(field: "token")
 }
+
+"============================================================ FACTORY ==========================================================" 
+type IdeaTokenFactory @entity {
+  "<factory address>"
+  id: ID!
+  owner: Bytes!
+}

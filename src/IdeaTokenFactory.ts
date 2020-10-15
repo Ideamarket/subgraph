@@ -4,7 +4,7 @@ import {
 	NewToken,
 	OwnershipChanged
 } from '../res/generated/IdeaTokenFactory/IdeaTokenFactory'
-import { IdeaMarket, IdeaToken } from '../res/generated/schema'
+import { IdeaMarket, IdeaToken, IdeaTokenFactory } from '../res/generated/schema'
 
 const zeroAddress = Address.fromString('0x0000000000000000000000000000000000000000')
 
@@ -40,9 +40,15 @@ export function handleNewToken(event: NewToken): void {
 	token.save()
 }
 
-/* eslint-disable-next-line */
 export function handleOwnershipChanged(event: OwnershipChanged): void {
+	let factory = IdeaTokenFactory.load(event.address.toHex())
+	if(!factory) {
+		factory = new IdeaTokenFactory(event.address.toHex())
+	}
 
+	factory.owner = event.params.newOwner
+
+	factory.save()
 }
 
 
