@@ -11,7 +11,7 @@ const zeroAddress = Address.fromString('0x00000000000000000000000000000000000000
 export function handleTransfer(event: Transfer): void {
 	const token = IdeaToken.load(event.address.toHex())
 	if(!token) {
-		throw 'IdeaToken does not exist on Transfer event'
+		return
 	}
 
 	if(event.params.from.equals(zeroAddress)) {
@@ -53,7 +53,7 @@ export function handleTransfer(event: Transfer): void {
 export function handleApproval(event: Approval): void {
 	const token = IdeaToken.load(event.address.toHex())
 	if(!token) {
-		throw 'IdeaToken does not exist on Approve event'
+		return
 	}
 
 	const allowanceID = event.params.owner.toHex() + '-' + event.params.spender.toHex() + '-' + token.id
@@ -71,7 +71,7 @@ export function handleApproval(event: Approval): void {
 export function handleOwnershipChanged(event: OwnershipChanged): void {
 	const token = IdeaToken.load(event.address.toHex())
 	if(!token) {
-		throw 'IdeaToken does not exist on OwnershipChanged event'
+		return
 	}
 
 	token.owner = event.params.newOwner
