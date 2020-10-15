@@ -107,6 +107,14 @@ async function main() {
 		const addr = jsonDeployed[contract]
 		jsonNetworkConfig[contract] = addr
 	}
+    
+	// Hardcode the startblock values. Does not need to be accurate, just save some sync time
+	if(network === 'kovan') {
+		jsonNetworkConfig['startBlock'] = 21500000
+	} else if(network === 'mainnet') {
+		jsonNetworkConfig['startBlock'] = 11000000
+	}
+
 	fs.writeFileSync('network-config.json', JSON.stringify(jsonNetworkConfig))
 
 	// Generate subgraph.yaml file
