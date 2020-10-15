@@ -1,9 +1,9 @@
-name: Build
+name: Build and Lint
 
 on: [ push ]
 
 jobs:
-  build:
+  build-lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -13,11 +13,13 @@ jobs:
       - name: Install dependencies
         run: |
             npm install
+            npm install -g eslint
             npm install -g truffle
             npm install -g @graphprotocol/graph-cli
       - name: Run build
         run: |
             node build.js
             graph build
+            eslint .
         env: 
             IDEAMARKET_CLONE_TOKEN: ${{ secrets.IDEAMARKET_CLONE_TOKEN }}
