@@ -5,7 +5,7 @@ dataSources:
   # ============================== IdeaToken ==============================
   - kind: ethereum/contract
     name: IdeaToken
-    network: mainnet # Todo 
+    network: {{ network }} 
     source:
       abi: IdeaToken
     mapping:
@@ -30,9 +30,9 @@ dataSources:
   # ============================== IdeaTokenFactory ==============================
   - kind: ethereum/contract
     name: IdeaTokenFactory
-    network: mainnet # Todo 
+    network: {{ network }}
     source:
-      address: "0x5a0b54d5dc17e0aadc383d2db43b0a0d3e029c4c" # Todo 
+      address: "{{ ideaTokenFactory }}"
       abi: IdeaTokenFactory
     mapping:
       kind: ethereum/events
@@ -56,9 +56,9 @@ dataSources:
   # ============================== IdeaTokenExchange ==============================
   - kind: ethereum/contract
     name: IdeaTokenExchange
-    network: mainnet # Todo 
+    network: {{ network }}
     source:
-      address: "0x5a0b54d5dc17e0aadc383d2db43b0a0d3e029c4c" # Todo 
+      address: "{{ ideaTokenExchange }}"
       abi: IdeaTokenExchange
     mapping:
       kind: ethereum/events
