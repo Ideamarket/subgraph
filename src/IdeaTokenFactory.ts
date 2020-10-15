@@ -1,46 +1,49 @@
 import { Address, BigInt } from '@graphprotocol/graph-ts'
 import {
-    NewMarket,
-    NewToken,
-    OwnershipChanged
+	NewMarket,
+	NewToken,
+	OwnershipChanged
 } from '../res/generated/IdeaTokenFactory/IdeaTokenFactory'
 import { IdeaMarket, IdeaToken } from '../res/generated/schema'
 
-let zeroAddress = Address.fromString('0x0000000000000000000000000000000000000000')
+const zeroAddress = Address.fromString('0x0000000000000000000000000000000000000000')
 
 export function handleNewMarket(event: NewMarket): void {
-    let market = new IdeaMarket(event.params.id.toHex())
+	const market = new IdeaMarket(event.params.id.toHex())
 
-    market.marketID = event.params.id.toI32()
-    market.name = event.params.name
-    market.baseCost = event.params.baseCost
-    market.priceRise = event.params.priceRise
-    market.tokensPerInterval = event.params.tokensPerInterval
-    market.tradingFeeRate = event.params.tradingFeeRate
-    market.platformFeeRate = event.params.platformFeeRate
+	market.marketID = event.params.id.toI32()
+	market.name = event.params.name
+	market.baseCost = event.params.baseCost
+	market.priceRise = event.params.priceRise
+	market.tokensPerInterval = event.params.tokensPerInterval
+	market.tradingFeeRate = event.params.tradingFeeRate
+	market.platformFeeRate = event.params.platformFeeRate
 
-    market.save()
+	market.save()
 }
 
 export function handleNewToken(event: NewToken): void {
-    let market = IdeaMarket.load(event.params.marketID.toHex())
-    if(!market) {
-      throw 'IdeaMarket does not exist on NewToken event'
-    }
+	const market = IdeaMarket.load(event.params.marketID.toHex())
+	if(!market) {
+		throw 'IdeaMarket does not exist on NewToken event'
+	}
 
-    let token = new IdeaToken(event.params.addr.toHex())
-    token.tokenID = event.params.id.toI32()
-    token.market = market.id
-    token.name = event.params.name
-    token.supply = BigInt.fromI32(0)
-    token.holders = 0
-    token.marketCap = BigInt.fromI32(0)
-    token.owner = zeroAddress
+	const token = new IdeaToken(event.params.addr.toHex())
+	token.tokenID = event.params.id.toI32()
+	token.market = market.id
+	token.name = event.params.name
+	token.supply = BigInt.fromI32(0)
+	token.holders = 0
+	token.marketCap = BigInt.fromI32(0)
+	token.owner = zeroAddress
 
-    token.save()
+	token.save()
 }
 
-export function handleOwnershipChanged(event: OwnershipChanged): void {}
+/* eslint-disable-next-line */
+export function handleOwnershipChanged(event: OwnershipChanged): void {
+
+}
 
 
 /*
