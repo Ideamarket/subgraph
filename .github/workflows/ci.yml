@@ -20,6 +20,8 @@ jobs:
         run: |
             node build.js
             graph build
-            eslint .
         env: 
             IDEAMARKET_CLONE_TOKEN: ${{ secrets.IDEAMARKET_CLONE_TOKEN }}
+      - name: Run ESLint
+        run: |
+            eslint .
