@@ -4,7 +4,6 @@ const fs = require('fs')
 const { exec } = require('child_process')
 /* eslint-disable-next-line @typescript-eslint/no-var-requires */
 const path = require('path')
-const { reduceEachTrailingCommentRange } = require('typescript')
 
 const buildDir = './res'
 const abiDir = './abis'
@@ -18,18 +17,18 @@ const contracts = [
 
 async function main() {
 
-    // Check for --kovan or --mainnet
-    let network = ''
+	// Check for --kovan or --mainnet
+	let network = ''
 
-    for(let i = 0; i < process.argv.length; i++) {
-        if(process.argv[i] === '--kovan') {
-            network = 'kovan'
-            break
-        } else if(process.argv[i] === '--mainnet') {
-            network = 'mainnet'
-            break
-        }
-    }
+	for(let i = 0; i < process.argv.length; i++) {
+		if(process.argv[i] === '--kovan') {
+			network = 'kovan'
+			break
+		} else if(process.argv[i] === '--mainnet') {
+			network = 'mainnet'
+			break
+		}
+	}
 
 	// Create build dir if it does not exist
 	if (!fs.existsSync(buildDir)) {
@@ -98,22 +97,22 @@ async function main() {
 		fs.writeFileSync(path.join(abiDir, file), abi)
 	})
 
-    // Extract addresses from deployed-{network}.json
-    console.log('> Extracting deployed addresses')
-    const rawDeployed = fs.readFileSync('ideamarket/deployed/deployed-' + network + '.json')
-    const jsonDeployed = JSON.parse(rawDeployed)
-    const jsonNetworkConfig = { network: network }
-    for(let i = 0; i < contracts.length; i++) {
-        const contract = contracts[i].charAt(0).toLowerCase() + contracts[i].slice(1)
-        const addr = jsonDeployed[contract]
-        jsonNetworkConfig[contract] = addr
-    }
-    fs.writeFileSync('network-config.json', JSON.stringify(jsonNetworkConfig))
+	// Extract addresses from deployed-{network}.json
+	console.log('> Extracting deployed addresses')
+	const rawDeployed = fs.readFileSync('ideamarket/deployed/deployed-' + network + '.json')
+	const jsonDeployed = JSON.parse(rawDeployed)
+	const jsonNetworkConfig = { network: network }
+	for(let i = 0; i < contracts.length; i++) {
+		const contract = contracts[i].charAt(0).toLowerCase() + contracts[i].slice(1)
+		const addr = jsonDeployed[contract]
+		jsonNetworkConfig[contract] = addr
+	}
+	fs.writeFileSync('network-config.json', JSON.stringify(jsonNetworkConfig))
 
-    // Generate subgraph.yaml file
-    process.chdir('..')
-    console.log('> Generating subgraph.yaml')
-    let mustacheCmd = 'mustache'
+	// Generate subgraph.yaml file
+	process.chdir('..')
+	console.log('> Generating subgraph.yaml')
+	let mustacheCmd = 'mustache'
 	if(process.platform === 'win32') {
 		mustacheCmd += '.cmd'
 	}
