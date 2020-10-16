@@ -1,10 +1,10 @@
-import { Address, BigInt } from '@graphprotocol/graph-ts'
+import { Address, BigDecimal, BigInt } from '@graphprotocol/graph-ts'
 import {
 	NewMarket,
 	NewToken,
 	OwnershipChanged
 } from '../res/generated/IdeaTokenFactory/IdeaTokenFactory'
-import { IdeaMarket, IdeaToken, IdeaTokenFactory } from '../res/generated/schema'
+import { IdeaMarket, IdeaToken, IdeaTokenFactory, IdeaTokenMarketCapPoint, IdeaTokenPricePoint } from '../res/generated/schema'
 
 const zeroAddress = Address.fromString('0x0000000000000000000000000000000000000000')
 
@@ -36,8 +36,25 @@ export function handleNewToken(event: NewToken): void {
 	token.holders = 0
 	token.marketCap = BigInt.fromI32(0)
 	token.owner = zeroAddress
-
 	token.save()
+  
+	// Initial price and market cap points
+	const marketCapPoint = new IdeaTokenMarketCapPoint(token.id + '-' + event.block.number.toHex() + '-' + event.transaction.index.toHex())
+	marketCapPoint.token = token.id
+	marketCapPoint.timestamp = event.block.timestamp
+	marketCapPoint.block = event.block.number
+	marketCapPoint.txindex = event.transaction.index
+	marketCapPoint.marketCap = BigDecimal.fromString('0')
+	marketCapPoint.save()
+
+	const pricePoint = new IdeaTokenPricePoint(token.id + '-' + event.block.number.toHex() + '-' + event.transaction.index.toHex())
+	const tenPow18 = BigDecimal.fromString('1000000000000000000')
+	pricePoint.token = token.id
+	pricePoint.timestamp = event.block.timestamp
+	pricePoint.block = event.block.number
+	pricePoint.txindex = event.transaction.index
+	pricePoint.price = market.baseCost.toBigDecimal().div(tenPow18)
+	pricePoint.save()
 }
 
 export function handleOwnershipChanged(event: OwnershipChanged): void {
