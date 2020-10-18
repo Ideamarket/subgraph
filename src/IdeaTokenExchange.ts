@@ -68,8 +68,5 @@ function makePricePoint(token: IdeaToken, market: IdeaMarket, timestamp: BigInt,
 
 function calculateDecimalPriceFromSupply(currentSupply: BigInt, market: IdeaMarket): BigDecimal {
 	const tenPow18 = BigDecimal.fromString('1000000000000000000')
-	const completedIntervals = currentSupply.div(market.tokensPerInterval)
-	const thisIntervalsPrice = market.baseCost.plus(completedIntervals.times(market.priceRise))
-
-	return thisIntervalsPrice.toBigDecimal().div(tenPow18)
+	return market.baseCost.plus(currentSupply.times(market.priceRise)).toBigDecimal().div(tenPow18)
 }

@@ -6,7 +6,6 @@ type IdeaMarket @entity {
   name: String!
   baseCost: BigInt!
   priceRise: BigInt!
-  tokensPerInterval: BigInt!
   tradingFeeRate: BigInt!
   platformFeeRate: BigInt!
   tokens: [IdeaToken!]! @derivedFrom(field: "market")

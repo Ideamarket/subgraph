@@ -48,7 +48,7 @@ dataSources:
         - name: IdeaTokenFactory
           file: ./res/abis/IdeaTokenFactory.json
       eventHandlers:
-        - event: NewMarket(uint256,string,uint256,uint256,uint256,uint256,uint256)
+        - event: NewMarket(uint256,string,uint256,uint256,uint256,uint256)
           handler: handleNewMarket
         - event: NewToken(uint256,uint256,string,address)
           handler: handleNewToken
