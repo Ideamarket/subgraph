@@ -2,8 +2,14 @@ import { BigDecimal, BigInt } from '@graphprotocol/graph-ts'
 import {
 	TokensBought,
 	TokensSold,
+	NewInterestWithdrawer,
+	NewPlatformFeeWithdrawer,
+	DaiInvested,
+	TradingFeeInvested,
+	PlatformFeeInvested,
+	OwnershipChanged
 } from '../res/generated/IdeaTokenExchange/IdeaTokenExchange'
-import { IdeaToken, IdeaMarket, IdeaTokenPricePoint, IdeaTokenMarketCapPoint } from '../res/generated/schema'
+import { IdeaToken, IdeaMarket, IdeaTokenPricePoint, IdeaTokenMarketCapPoint, IdeaTokenExchange } from '../res/generated/schema'
 
 export function handleTokensBought(event: TokensBought): void {
 
@@ -43,6 +49,52 @@ export function handleTokensSold(event: TokensSold): void {
 
 	makePricePoint(token as IdeaToken, market as IdeaMarket, event.block.timestamp, event.block.number, event.transaction.index)
 	makeMarketCapPoint(token as IdeaToken, event.block.timestamp, event.block.number, event.transaction.index)
+}
+
+export function handleNewInterestWithdrawer(event: NewInterestWithdrawer): void {
+	const token = IdeaToken.load(event.params.ideaToken.toHex())
+	token.interestWithdrawer = event.params.withdrawer
+	token.save()
+}
+
+export function handleNewPlatformFeeWithdrawer(event: NewPlatformFeeWithdrawer): void {
+	const market = IdeaMarket.load(event.params.marketID.toHex())
+	market.platformFeeWithdrawer = event.params.withdrawer
+	market.save()
+}
+
+export function handleDaiInvested(event: DaiInvested): void {
+	const token = IdeaToken.load(event.params.ideaToken.toHex())
+	token.daiInToken = event.params.daiInToken
+	token.invested = event.params.investmentToken
+	token.save()
+}
+
+export function handlePlatformFeeInvested(event: PlatformFeeInvested): void {
+	const market = IdeaMarket.load(event.params.marketID.toHex())
+	market.platformFeeInvested = event.params.investmentToken
+	market.save()
+}
+
+export function handleTradingFeeInvested(event: TradingFeeInvested): void {
+	const exchange = IdeaTokenExchange.load(event.address.toHex())
+	if(!exchange) {
+		throw 'IdeaTokenExchange does not exist on TradingFeeInvested event'
+	}
+
+	exchange.tradingFeeInvested = event.params.investmentToken
+	exchange.save()
+}
+
+export function handleOwnershipChanged(event: OwnershipChanged): void {
+	let exchange = IdeaTokenExchange.load(event.address.toHex())
+	if(!exchange) {
+		exchange = new IdeaTokenExchange(event.address.toHex())
+	}
+
+	exchange.owner = event.params.newOwner
+	exchange.tradingFeeInvested = BigInt.fromI32(0)
+	exchange.save()
 }
 
 function makeMarketCapPoint(token: IdeaToken, timestamp: BigInt, block: BigInt, txindex: BigInt): void {

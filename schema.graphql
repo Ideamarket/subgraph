@@ -8,6 +8,8 @@ type IdeaMarket @entity {
   priceRise: BigInt!
   tradingFeeRate: BigInt!
   platformFeeRate: BigInt!
+  platformFeeWithdrawer: Bytes!
+  platformFeeInvested: BigInt!
   tokens: [IdeaToken!]! @derivedFrom(field: "market")
 }
 
@@ -57,6 +59,9 @@ type IdeaToken @entity {
   holders: Int!
   marketCap: BigInt!
   owner: Bytes!
+  interestWithdrawer: Bytes!
+  daiInToken: BigInt!
+  invested: BigInt!
   balances: [IdeaTokenBalance!]! @derivedFrom(field: "token")
   allowances: [IdeaTokenAllowance!]! @derivedFrom(field: "token")
   pricePoints: [IdeaTokenPricePoint!]! @derivedFrom(field: "token")
@@ -68,4 +73,12 @@ type IdeaTokenFactory @entity {
   "<factory address>"
   id: ID!
   owner: Bytes!
+}
+
+"============================================================ EXCHANGE =========================================================" 
+type IdeaTokenExchange @entity {
+  "<exchange address>"
+  id: ID!
+  owner: Bytes!
+  tradingFeeInvested: BigInt!
 }
