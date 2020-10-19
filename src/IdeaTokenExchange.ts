@@ -11,6 +11,8 @@ import {
 } from '../res/generated/IdeaTokenExchange/IdeaTokenExchange'
 import { IdeaToken, IdeaMarket, IdeaTokenPricePoint, IdeaTokenMarketCapPoint, IdeaTokenExchange } from '../res/generated/schema'
 
+const tenPow18 = BigDecimal.fromString('1000000000000000000')
+
 export function handleTokensBought(event: TokensBought): void {
 
 	// Update market cap
@@ -28,7 +30,7 @@ export function handleTokensBought(event: TokensBought): void {
 		throw 'IdeaMarket does not exist on TokensBought event'
 	}
 
-	makePricePoint(token as IdeaToken, market as IdeaMarket, event.block.timestamp, event.block.number, event.transaction.index)
+	makePricePoint(token as IdeaToken, market as IdeaMarket, event.params.finalCost, event.block.timestamp, event.block.number, event.transaction.index)
 	makeMarketCapPoint(token as IdeaToken, event.block.timestamp, event.block.number, event.transaction.index)
 }
 
@@ -47,7 +49,7 @@ export function handleTokensSold(event: TokensSold): void {
 		throw 'IdeaMarket does not exist on TokensSold event'
 	}
 
-	makePricePoint(token as IdeaToken, market as IdeaMarket, event.block.timestamp, event.block.number, event.transaction.index)
+	makePricePoint(token as IdeaToken, market as IdeaMarket, event.params.rawPrice, event.block.timestamp, event.block.number, event.transaction.index)
 	makeMarketCapPoint(token as IdeaToken, event.block.timestamp, event.block.number, event.transaction.index)
 }
 
@@ -98,7 +100,6 @@ export function handleOwnershipChanged(event: OwnershipChanged): void {
 }
 
 function makeMarketCapPoint(token: IdeaToken, timestamp: BigInt, block: BigInt, txindex: BigInt): void {
-	const tenPow18 = BigDecimal.fromString('1000000000000000000')
 	const marketCapPoint = new IdeaTokenMarketCapPoint(token.id + '-' + block.toHex() + '-' + txindex.toHex())
 	marketCapPoint.token = token.id
 	marketCapPoint.timestamp = timestamp
@@ -108,17 +109,17 @@ function makeMarketCapPoint(token: IdeaToken, timestamp: BigInt, block: BigInt, 
 	marketCapPoint.save()
 }
 
-function makePricePoint(token: IdeaToken, market: IdeaMarket, timestamp: BigInt, block: BigInt, txindex: BigInt): void {
+function makePricePoint(token: IdeaToken, market: IdeaMarket, volume: BigInt, timestamp: BigInt, block: BigInt, txindex: BigInt): void {
 	const pricePoint = new IdeaTokenPricePoint(token.id + '-' + block.toHex() + '-' + txindex.toHex())
 	pricePoint.token = token.id
 	pricePoint.timestamp = timestamp
 	pricePoint.block = block
 	pricePoint.txindex = txindex
 	pricePoint.price = calculateDecimalPriceFromSupply(token.supply, market)
+	pricePoint.volume = volume.toBigDecimal().div(tenPow18)
 	pricePoint.save()
 }
 
 function calculateDecimalPriceFromSupply(currentSupply: BigInt, market: IdeaMarket): BigDecimal {
-	const tenPow18 = BigDecimal.fromString('1000000000000000000')
 	return market.baseCost.plus(currentSupply.times(market.priceRise)).toBigDecimal().div(tenPow18)
 }

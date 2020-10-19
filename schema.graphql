@@ -23,6 +23,7 @@ type IdeaTokenPricePoint @entity {
   block: BigInt!
   txindex: BigInt!
   price: BigDecimal!
+  volume: BigDecimal!
 }
 
 type IdeaTokenMarketCapPoint @entity {
