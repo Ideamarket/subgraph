@@ -57,6 +57,7 @@ export function handleNewToken(event: NewToken): void {
 	pricePoint.block = event.block.number
 	pricePoint.txindex = event.transaction.index
 	pricePoint.price = market.baseCost.toBigDecimal().div(tenPow18)
+	pricePoint.volume = BigDecimal.fromString('0')
 	pricePoint.save()
 }
 
