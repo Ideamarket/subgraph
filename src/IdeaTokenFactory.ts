@@ -38,7 +38,7 @@ export function handleNewToken(event: NewToken): void {
 	token.owner = zeroAddress
 	token.interestWithdrawer = zeroAddress
 	token.daiInToken = BigInt.fromI32(0)
-	token.daiInToken = BigInt.fromI32(0)
+	token.invested = BigInt.fromI32(0)
 	token.save()
   
 	// Initial price and market cap points
