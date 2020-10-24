@@ -84,7 +84,7 @@ dataSources:
           handler: handleNewInterestWithdrawer
         - event: NewPlatformFeeWithdrawer(uint256,address)
           handler: handleNewPlatformFeeWithdrawer
-        - event: InvestedState(uint256,address,uint256,uint256,uint256,uint256)
+        - event: InvestedState(uint256,address,uint256,uint256,uint256,uint256,uint256)
           handler: handleInvestedState
         - event: DaiRedeemed(address,uint256)
           handler: handleDaiRedeemed
