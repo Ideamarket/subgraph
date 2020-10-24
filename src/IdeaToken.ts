@@ -10,7 +10,7 @@ const zeroAddress = Address.fromString('0x00000000000000000000000000000000000000
 const tenPow18 = BigDecimal.fromString('1000000000000000000')
 
 /*
-	// https://thegraph.com/docs/assemblyscript-api#api-referenc
+	// https://thegraph.com/docs/assemblyscript-api#api-reference
 
 	// This won't work
 	entity.numbers.push(BigInt.fromI32(1))
