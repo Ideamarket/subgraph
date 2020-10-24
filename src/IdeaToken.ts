@@ -72,7 +72,7 @@ export function handleBlock(block: ethereum.Block): void {
 			} else {
 				const startPricePoint = IdeaTokenPricePoint.load(dayPricePoints[0])
 				const endPricePoint = IdeaTokenPricePoint.load(dayPricePoints[dayPricePoints.length - 1])
-				token.dayChange = endPricePoint.price.div(startPricePoint.price).minus(BigDecimal.fromString('1'))
+				token.dayChange = endPricePoint.price.div(startPricePoint.oldPrice).minus(BigDecimal.fromString('1'))
 			}
 
 			token.save()
