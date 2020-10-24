@@ -26,16 +26,6 @@ type IdeaTokenPricePoint @entity {
   price: BigDecimal!
 }
 
-type IdeaTokenMarketCapPoint @entity {
-  "<token address>-<block>-<txindex>"
-  id: ID!
-  token: IdeaToken!
-  timestamp: BigInt!
-  block: BigInt!
-  txindex: BigInt!
-  marketCap: BigDecimal!
-}
-
 type IdeaTokenBalance @entity {
   "<account address>-<token address>"
   id: ID!
@@ -69,7 +59,6 @@ type IdeaToken @entity {
   latestPricePoint: IdeaTokenPricePoint!
   dayPricePoints: [IdeaTokenPricePoint!]!
   pricePoints: [IdeaTokenPricePoint!]! @derivedFrom(field: "token")
-  marketCapPoints: [IdeaTokenMarketCapPoint!]! @derivedFrom(field: "token")
 }
 
 "============================================================ FACTORY ==========================================================" 

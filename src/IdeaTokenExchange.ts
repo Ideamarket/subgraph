@@ -8,9 +8,7 @@ import {
 	OwnershipChanged,
 	InvestedState
 } from '../res/generated/IdeaTokenExchange/IdeaTokenExchange'
-import { IdeaToken, IdeaMarket, IdeaTokenMarketCapPoint, IdeaTokenExchange } from '../res/generated/schema'
-
-const tenPow18 = BigDecimal.fromString('1000000000000000000')
+import { IdeaToken, IdeaMarket, IdeaTokenExchange } from '../res/generated/schema'
 
 export function handleInvestedState(event: InvestedState): void {
 	const exchange = IdeaTokenExchange.load(event.address.toHex())
@@ -32,8 +30,6 @@ export function handleInvestedState(event: InvestedState): void {
 	token.invested = event.params.daiInvested
 	market.platformFeeInvested = event.params.platformFeeInvested
 	exchange.tradingFeeInvested = event.params.tradingFeeInvested
-
-	makeMarketCapPoint(token.id, token.marketCap, event.block.timestamp, event.block.number, event.transaction.index)
 
 	token.save()
 	market.save()
@@ -95,14 +91,4 @@ export function handleOwnershipChanged(event: OwnershipChanged): void {
 	exchange.owner = event.params.newOwner
 	exchange.tradingFeeInvested = BigInt.fromI32(0)
 	exchange.save()
-}
-
-function makeMarketCapPoint(tokenID: string, marketCap: BigInt, timestamp: BigInt, block: BigInt, txindex: BigInt): void {
-	const marketCapPoint = new IdeaTokenMarketCapPoint(tokenID + '-' + block.toHex() + '-' + txindex.toHex())
-	marketCapPoint.token = tokenID
-	marketCapPoint.timestamp = timestamp
-	marketCapPoint.block = block
-	marketCapPoint.txindex = txindex
-	marketCapPoint.marketCap = marketCap.toBigDecimal().div(tenPow18)
-	marketCapPoint.save()
 }

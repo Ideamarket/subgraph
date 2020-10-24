@@ -4,7 +4,7 @@ import {
 	NewToken,
 	OwnershipChanged
 } from '../res/generated/IdeaTokenFactory/IdeaTokenFactory'
-import { IdeaMarket, IdeaToken, IdeaTokenFactory, IdeaTokenMarketCapPoint, IdeaTokenPricePoint } from '../res/generated/schema'
+import { IdeaMarket, IdeaToken, IdeaTokenFactory, IdeaTokenPricePoint } from '../res/generated/schema'
 
 const zeroAddress = Address.fromString('0x0000000000000000000000000000000000000000')
 const tenPow18 = BigDecimal.fromString('1000000000000000000')
@@ -30,15 +30,6 @@ export function handleNewToken(event: NewToken): void {
 	}
 
 	const tokenID = event.params.addr.toHex()
-
-	// Initial price and market cap points
-	const marketCapPoint = new IdeaTokenMarketCapPoint(tokenID + '-' + event.block.number.toHex() + '-' + event.transaction.index.toHex())
-	marketCapPoint.token = tokenID
-	marketCapPoint.timestamp = event.block.timestamp
-	marketCapPoint.block = event.block.number
-	marketCapPoint.txindex = event.transaction.index
-	marketCapPoint.marketCap = BigDecimal.fromString('0')
-	marketCapPoint.save()
 
 	const pricePointID = tokenID + '-' + event.block.number.toHex() + '-' + event.transaction.index.toHex()
 	const pricePoint = new IdeaTokenPricePoint(pricePointID)
