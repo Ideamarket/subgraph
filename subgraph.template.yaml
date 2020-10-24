@@ -79,6 +79,8 @@ dataSources:
       abis:
         - name: IdeaTokenExchange
           file: ./res/abis/IdeaTokenExchange.json
+      blockHandlers:
+        - handler: handleBlock
       eventHandlers:
         - event: NewInterestWithdrawer(address,address)
           handler: handleNewInterestWithdrawer

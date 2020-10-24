@@ -22,8 +22,8 @@ type IdeaTokenPricePoint @entity {
   timestamp: BigInt!
   block: BigInt!
   txindex: BigInt!
+  oldPrice: BigDecimal!
   price: BigDecimal!
-  volume: BigDecimal!
 }
 
 type IdeaTokenMarketCapPoint @entity {
@@ -63,22 +63,26 @@ type IdeaToken @entity {
   interestWithdrawer: Bytes!
   daiInToken: BigInt!
   invested: BigInt!
+  dayChange: BigDecimal!
   balances: [IdeaTokenBalance!]! @derivedFrom(field: "token")
   allowances: [IdeaTokenAllowance!]! @derivedFrom(field: "token")
+  latestPricePoint: IdeaTokenPricePoint!
+  dayPricePoints: [IdeaTokenPricePoint!]!
   pricePoints: [IdeaTokenPricePoint!]! @derivedFrom(field: "token")
   marketCapPoints: [IdeaTokenMarketCapPoint!]! @derivedFrom(field: "token")
 }
 
 "============================================================ FACTORY ==========================================================" 
 type IdeaTokenFactory @entity {
-  "<factory address>"
+  "id: factory"
   id: ID!
   owner: Bytes!
+  allTokens: [IdeaToken!]!
 }
 
 "============================================================ EXCHANGE =========================================================" 
 type IdeaTokenExchange @entity {
-  "<exchange address>"
+  "id: exchange"
   id: ID!
   owner: Bytes!
   tradingFeeInvested: BigInt!
