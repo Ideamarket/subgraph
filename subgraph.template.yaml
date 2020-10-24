@@ -80,20 +80,18 @@ dataSources:
         - name: IdeaTokenExchange
           file: ./res/abis/IdeaTokenExchange.json
       eventHandlers:
-        - event: TokensBought(address,uint256,uint256,uint256)
-          handler: handleTokensBought
-        - event: TokensSold(address,uint256,uint256,uint256)
-          handler: handleTokensSold
         - event: NewInterestWithdrawer(address,address)
           handler: handleNewInterestWithdrawer
         - event: NewPlatformFeeWithdrawer(uint256,address)
           handler: handleNewPlatformFeeWithdrawer
-        - event: DaiInvested(address,uint256,uint256)
-          handler: handleDaiInvested
-        - event: TradingFeeInvested(uint256)
-          handler: handleTradingFeeInvested
-        - event: PlatformFeeInvested(uint256,uint256)
-          handler: handlePlatformFeeInvested
+        - event: InvestedState(uint256,address,uint256,uint256,uint256,uint256)
+          handler: handleInvestedState
+        - event: DaiRedeemed(address,uint256)
+          handler: handleDaiRedeemed
+        - event: TradingFeeRedeemed()
+          handler: handleTradingFeeRedeemed
+        - event: PlatformFeeRedeemed(uint256)
+          handler: handlePlatformFeeRedeemed
         - event: OwnershipChanged(address,address)
           handler: handleOwnershipChanged
       file: ./src/IdeaTokenExchange.ts
