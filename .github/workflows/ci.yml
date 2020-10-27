@@ -1,4 +1,4 @@
-name: Build and Lint
+name: Build
 
 on: [ push ]
 
@@ -14,14 +14,9 @@ jobs:
         run: |
             npm install
             npm install -g mustache
-            npm install -g eslint
-            npm install -g truffle
             npm install -g @graphprotocol/graph-cli
       - name: Run build
         run: |
             npm run-script build:kovan
         env: 
             IDEAMARKET_CLONE_TOKEN: ${{ secrets.IDEAMARKET_CLONE_TOKEN }}
-      - name: Run ESLint
-        run: |
-            eslint .
