@@ -10,9 +10,9 @@ const abiDir = './abis'
 const contractsRepo = 'github.com/ideamarket/ideamarket-contracts.git'
 
 const contracts = [
-	'IdeaToken',
-	'IdeaTokenFactory',
-	'IdeaTokenExchange'
+	['IdeaToken', 'core'],
+	['IdeaTokenFactory', 'core'],
+	['IdeaTokenExchange', 'core']
 ]
 
 async function main() {
@@ -68,7 +68,7 @@ async function main() {
 
 	// Compile contracts
 	console.log('> Compiling contracts')
-	await executeCmd('truffle compile')
+	await executeCmd('npx hardhat compile')
 
 	process.chdir('..')
 
@@ -84,8 +84,8 @@ async function main() {
 	// Extracts ABIs from contract build
 	console.log('> Extracting ABIs')
 	contracts.forEach((contract) => {
-		const file = contract + '.json'
-		const curPath = path.join('ideamarket/build/contracts', file)
+		const file = contract[0] + '.json'
+		const curPath = path.join('ideamarket/build/contracts/contracts/', contract[1], contract[0] + '.sol', file)
 		if(!curPath.endsWith('.json')) {
 			console.log('>     ignoring file ' + curPath)
 			return
@@ -103,7 +103,7 @@ async function main() {
 	const jsonDeployed = JSON.parse(rawDeployed)
 	const jsonNetworkConfig = { network: network }
 	for(let i = 0; i < contracts.length; i++) {
-		const contract = contracts[i].charAt(0).toLowerCase() + contracts[i].slice(1)
+		const contract = contracts[i][0].charAt(0).toLowerCase() + contracts[i][0].slice(1)
 		const addr = jsonDeployed[contract]
 		jsonNetworkConfig[contract] = addr
 	}
