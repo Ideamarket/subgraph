@@ -47,6 +47,8 @@ dataSources:
       abis:
         - name: IdeaTokenFactory
           file: ./res/abis/IdeaTokenFactory.json
+      blockHandlers:
+        - handler: handleBlock
       eventHandlers:
         - event: NewMarket(uint256,string,uint256,uint256,uint256,uint256)
           handler: handleNewMarket
@@ -79,8 +81,6 @@ dataSources:
       abis:
         - name: IdeaTokenExchange
           file: ./res/abis/IdeaTokenExchange.json
-      blockHandlers:
-        - handler: handleBlock
       eventHandlers:
         - event: NewInterestWithdrawer(address,address)
           handler: handleNewInterestWithdrawer
