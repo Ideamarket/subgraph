@@ -2,3 +2,6 @@
 /build/**
 /node_modules/**
 /res/**
+
+*.yaml
+*.graphql

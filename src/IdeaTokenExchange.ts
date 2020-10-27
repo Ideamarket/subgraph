@@ -6,7 +6,7 @@ import {
 	TradingFeeRedeemed,
 	PlatformFeeRedeemed,
 	OwnershipChanged,
-	InvestedState
+	InvestedState,
 } from '../res/generated/IdeaTokenExchange/IdeaTokenExchange'
 import { IdeaToken, IdeaMarket, IdeaTokenExchange } from '../res/generated/schema'
 
@@ -15,16 +15,16 @@ export function handleInvestedState(event: InvestedState): void {
 	const market = IdeaMarket.load(event.params.marketID.toHex())
 	const token = IdeaToken.load(event.params.ideaToken.toHex())
 
-	if(!exchange) {
+	if (!exchange) {
 		throw 'IdeaTokenExchange does not exist on InvestedState event'
 	}
-	if(!market) {
+	if (!market) {
 		throw 'Market does not exist on InvestedState event'
 	}
-	if(!token) {
+	if (!token) {
 		throw 'IdeaToken does not exist on InvestedState event'
 	}
-	
+
 	token.daiInToken = event.params.daiInToken
 	token.marketCap = event.params.daiInToken
 	token.invested = event.params.daiInvested
@@ -38,7 +38,7 @@ export function handleInvestedState(event: InvestedState): void {
 
 export function handleNewInterestWithdrawer(event: NewInterestWithdrawer): void {
 	const token = IdeaToken.load(event.params.ideaToken.toHex())
-	if(!token) {
+	if (!token) {
 		throw 'IdeaToken does not exist on NewInterestWithdrawer event'
 	}
 	token.interestWithdrawer = event.params.withdrawer
@@ -47,7 +47,7 @@ export function handleNewInterestWithdrawer(event: NewInterestWithdrawer): void 
 
 export function handleNewPlatformFeeWithdrawer(event: NewPlatformFeeWithdrawer): void {
 	const market = IdeaMarket.load(event.params.marketID.toHex())
-	if(!market) {
+	if (!market) {
 		throw 'Market does not exist on handleNewPlatformFeeWithdrawer event'
 	}
 	market.platformFeeWithdrawer = event.params.withdrawer
@@ -56,7 +56,7 @@ export function handleNewPlatformFeeWithdrawer(event: NewPlatformFeeWithdrawer):
 
 export function handleDaiReddemed(event: DaiRedeemed): void {
 	const token = IdeaToken.load(event.params.ideaToken.toHex())
-	if(!token) {
+	if (!token) {
 		throw 'IdeaToken does not exist on DaiRedeemed event'
 	}
 	token.invested = event.params.investmentToken
@@ -65,7 +65,7 @@ export function handleDaiReddemed(event: DaiRedeemed): void {
 
 export function handlePlatformFeeRedeemed(event: PlatformFeeRedeemed): void {
 	const market = IdeaMarket.load(event.params.marketID.toHex())
-	if(!market) {
+	if (!market) {
 		throw 'Market does not exist on PlatformFeeRedeemed event'
 	}
 	market.platformFeeInvested = BigInt.fromI32(0)
@@ -74,7 +74,7 @@ export function handlePlatformFeeRedeemed(event: PlatformFeeRedeemed): void {
 
 export function handleTradingFeeRedeemed(event: TradingFeeRedeemed): void {
 	const exchange = IdeaTokenExchange.load(event.address.toHex())
-	if(!exchange) {
+	if (!exchange) {
 		throw 'IdeaTokenExchange does not exist on TradingFeeRedeemed event'
 	}
 
@@ -84,7 +84,7 @@ export function handleTradingFeeRedeemed(event: TradingFeeRedeemed): void {
 
 export function handleOwnershipChanged(event: OwnershipChanged): void {
 	let exchange = IdeaTokenExchange.load(event.address.toHex())
-	if(!exchange) {
+	if (!exchange) {
 		exchange = new IdeaTokenExchange(event.address.toHex())
 	}
 

@@ -1,10 +1,13 @@
 import { Address, BigInt, BigDecimal, ethereum } from '@graphprotocol/graph-ts'
+import { Transfer, Approval, OwnershipChanged } from '../res/generated/IdeaToken/IdeaToken'
 import {
-	Transfer,
-	Approval,
-	OwnershipChanged
-} from '../res/generated/IdeaToken/IdeaToken'
-import { IdeaTokenFactory, IdeaToken, IdeaTokenBalance, IdeaTokenAllowance, IdeaMarket, IdeaTokenPricePoint } from '../res/generated/schema'
+	IdeaTokenFactory,
+	IdeaToken,
+	IdeaTokenBalance,
+	IdeaTokenAllowance,
+	IdeaMarket,
+	IdeaTokenPricePoint,
+} from '../res/generated/schema'
 
 const zeroAddress = Address.fromString('0x0000000000000000000000000000000000000000')
 const tenPow18 = BigDecimal.fromString('1000000000000000000')
@@ -25,7 +28,7 @@ const tenPow18 = BigDecimal.fromString('1000000000000000000')
 
 export function handleBlock(block: ethereum.Block): void {
 	const factory = IdeaTokenFactory.load('factory')
-	if(!factory) {
+	if (!factory) {
 		// Gets called on every block, factory might not be deployed yet
 		return
 	}
@@ -33,41 +36,41 @@ export function handleBlock(block: ethereum.Block): void {
 	const currentTS = block.timestamp
 	const minTS = currentTS.minus(BigInt.fromI32(86400))
 
-	for(let i = 0; i < factory.allTokens.length; i++) {
+	for (let i = 0; i < factory.allTokens.length; i++) {
 		const allTokens = factory.allTokens
 		const token = IdeaToken.load(allTokens[i])
-		if(!token) {
+		if (!token) {
 			throw 'Failed to load token in handleBlock'
 		}
 
 		let dayPricePoints = token.dayPricePoints
 
 		let dropUntilIndex = 0
-		for( ; dropUntilIndex < dayPricePoints.length; dropUntilIndex++) {
+		for (; dropUntilIndex < dayPricePoints.length; dropUntilIndex++) {
 			const pricePoint = IdeaTokenPricePoint.load(dayPricePoints[dropUntilIndex])
-			if(!pricePoint) {
+			if (!pricePoint) {
 				throw 'Failed to load price point in handleBlock'
 			}
 
-			if(pricePoint.timestamp.gt(minTS)) {
+			if (pricePoint.timestamp.gt(minTS)) {
 				break
 			}
 		}
 
 		let update = false
-		if(dropUntilIndex !== 0) {
+		if (dropUntilIndex !== 0) {
 			token.dayPricePoints = dayPricePoints.slice(dropUntilIndex + 1, token.dayPricePoints.length)
 			update = true
-		} else if(dayPricePoints.length > 0) {
+		} else if (dayPricePoints.length > 0) {
 			const latest = IdeaTokenPricePoint.load(token.latestPricePoint)
-			if(latest.timestamp === currentTS) {
+			if (latest.timestamp === currentTS) {
 				update = true
 			}
 		}
 
-		if(update) {
+		if (update) {
 			dayPricePoints = token.dayPricePoints
-			if(dayPricePoints.length === 0) {
+			if (dayPricePoints.length === 0) {
 				token.dayChange = BigDecimal.fromString('0')
 			} else {
 				const startPricePoint = IdeaTokenPricePoint.load(dayPricePoints[0])
@@ -82,18 +85,26 @@ export function handleBlock(block: ethereum.Block): void {
 
 export function handleTransfer(event: Transfer): void {
 	const token = IdeaToken.load(event.address.toHex())
-	if(!token) {
+	if (!token) {
 		return
 	}
 	const market = IdeaMarket.load(token.market)
-	if(!market) {
+	if (!market) {
 		throw 'Market does not exist on Transfer event'
 	}
 
-	if(event.params.from.equals(zeroAddress)) {
+	if (event.params.from.equals(zeroAddress)) {
 		token.supply = token.supply.plus(event.params.value)
 		const oldPricePoint = IdeaTokenPricePoint.load(token.latestPricePoint)
-		const pricePoint = makePricePoint(market as IdeaMarket, token.id, token.supply, oldPricePoint.price, event.block.timestamp, event.block.number, event.transaction.index)
+		const pricePoint = makePricePoint(
+			market as IdeaMarket,
+			token.id,
+			token.supply,
+			oldPricePoint.price,
+			event.block.timestamp,
+			event.block.number,
+			event.transaction.index
+		)
 		token.latestPricePoint = pricePoint.id
 		const dayPricePoints = token.dayPricePoints
 		dayPricePoints.push(pricePoint.id)
@@ -106,15 +117,23 @@ export function handleTransfer(event: Transfer): void {
 		fromBalance.amount = fromBalance.amount.minus(event.params.value)
 		fromBalance.save()
 
-		if(fromBalance.amount.equals(BigInt.fromI32(0))) {
+		if (fromBalance.amount.equals(BigInt.fromI32(0))) {
 			token.holders = token.holders - 1
 		}
 	}
 
-	if(event.params.to.equals(zeroAddress)) {
+	if (event.params.to.equals(zeroAddress)) {
 		token.supply = token.supply.minus(event.params.value)
 		const oldPricePoint = IdeaTokenPricePoint.load(token.latestPricePoint)
-		const pricePoint = makePricePoint(market as IdeaMarket, token.id, token.supply, oldPricePoint.price, event.block.timestamp, event.block.number, event.transaction.index)
+		const pricePoint = makePricePoint(
+			market as IdeaMarket,
+			token.id,
+			token.supply,
+			oldPricePoint.price,
+			event.block.timestamp,
+			event.block.number,
+			event.transaction.index
+		)
 		token.latestPricePoint = pricePoint.id
 		const dayPricePoints = token.dayPricePoints
 		dayPricePoints.push(pricePoint.id)
@@ -130,7 +149,7 @@ export function handleTransfer(event: Transfer): void {
 		toBalance.amount = toBalance.amount.plus(event.params.value)
 		toBalance.save()
 
-		if(beforeBalance.equals(BigInt.fromI32(0)) && !toBalance.amount.equals(BigInt.fromI32(0))) {
+		if (beforeBalance.equals(BigInt.fromI32(0)) && !toBalance.amount.equals(BigInt.fromI32(0))) {
 			token.holders = token.holders + 1
 		}
 	}
@@ -140,13 +159,13 @@ export function handleTransfer(event: Transfer): void {
 
 export function handleApproval(event: Approval): void {
 	const token = IdeaToken.load(event.address.toHex())
-	if(!token) {
+	if (!token) {
 		return
 	}
 
 	const allowanceID = event.params.owner.toHex() + '-' + event.params.spender.toHex() + '-' + token.id
 	let allowance = IdeaTokenAllowance.load(allowanceID)
-	if(!allowance) {
+	if (!allowance) {
 		allowance = new IdeaTokenAllowance(allowanceID)
 		allowance.token = token.id
 		allowance.amount = BigInt.fromI32(0)
@@ -158,7 +177,7 @@ export function handleApproval(event: Approval): void {
 
 export function handleOwnershipChanged(event: OwnershipChanged): void {
 	const token = IdeaToken.load(event.address.toHex())
-	if(!token) {
+	if (!token) {
 		return
 	}
 
@@ -166,7 +185,15 @@ export function handleOwnershipChanged(event: OwnershipChanged): void {
 	token.save()
 }
 
-function makePricePoint(market: IdeaMarket, tokenID: string, supply: BigInt, oldPrice: BigDecimal, timestamp: BigInt, block: BigInt, txindex: BigInt): IdeaTokenPricePoint {
+function makePricePoint(
+	market: IdeaMarket,
+	tokenID: string,
+	supply: BigInt,
+	oldPrice: BigDecimal,
+	timestamp: BigInt,
+	block: BigInt,
+	txindex: BigInt
+): IdeaTokenPricePoint {
 	const pricePoint = new IdeaTokenPricePoint(tokenID + '-' + block.toHex() + '-' + txindex.toHex())
 	pricePoint.token = tokenID
 	pricePoint.timestamp = timestamp

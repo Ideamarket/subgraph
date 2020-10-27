@@ -1,9 +1,5 @@
 import { Address, BigDecimal, BigInt } from '@graphprotocol/graph-ts'
-import {
-	NewMarket,
-	NewToken,
-	OwnershipChanged
-} from '../res/generated/IdeaTokenFactory/IdeaTokenFactory'
+import { NewMarket, NewToken, OwnershipChanged } from '../res/generated/IdeaTokenFactory/IdeaTokenFactory'
 import { IdeaMarket, IdeaToken, IdeaTokenFactory, IdeaTokenPricePoint } from '../res/generated/schema'
 
 const zeroAddress = Address.fromString('0x0000000000000000000000000000000000000000')
@@ -25,7 +21,7 @@ export function handleNewMarket(event: NewMarket): void {
 
 export function handleNewToken(event: NewToken): void {
 	const market = IdeaMarket.load(event.params.marketID.toHex())
-	if(!market) {
+	if (!market) {
 		throw 'IdeaMarket does not exist on NewToken event'
 	}
 
@@ -37,7 +33,7 @@ export function handleNewToken(event: NewToken): void {
 	pricePoint.timestamp = event.block.timestamp
 	pricePoint.block = event.block.number
 	pricePoint.txindex = event.transaction.index
-	pricePoint.oldPrice = market.baseCost.toBigDecimal().div(tenPow18) 
+	pricePoint.oldPrice = market.baseCost.toBigDecimal().div(tenPow18)
 	pricePoint.price = market.baseCost.toBigDecimal().div(tenPow18)
 	pricePoint.save()
 
@@ -58,7 +54,7 @@ export function handleNewToken(event: NewToken): void {
 	token.save()
 
 	const factory = IdeaTokenFactory.load('factory')
-	if(!factory) {
+	if (!factory) {
 		throw 'IdeaTokenFactory does not exist on NewToken event'
 	}
 	const allTokens = factory.allTokens
@@ -69,7 +65,7 @@ export function handleNewToken(event: NewToken): void {
 
 export function handleOwnershipChanged(event: OwnershipChanged): void {
 	let factory = IdeaTokenFactory.load('factory')
-	if(!factory) {
+	if (!factory) {
 		factory = new IdeaTokenFactory('factory')
 		factory.allTokens = []
 	}

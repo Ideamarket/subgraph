@@ -12,19 +12,18 @@ const contractsRepo = 'github.com/ideamarket/ideamarket-contracts.git'
 const contracts = [
 	['IdeaToken', 'core'],
 	['IdeaTokenFactory', 'core'],
-	['IdeaTokenExchange', 'core']
+	['IdeaTokenExchange', 'core'],
 ]
 
 async function main() {
-
 	// Check for --kovan or --mainnet
 	let network = ''
 
-	for(let i = 0; i < process.argv.length; i++) {
-		if(process.argv[i] === '--kovan') {
+	for (let i = 0; i < process.argv.length; i++) {
+		if (process.argv[i] === '--kovan') {
 			network = 'kovan'
 			break
-		} else if(process.argv[i] === '--mainnet') {
+		} else if (process.argv[i] === '--mainnet') {
 			network = 'mainnet'
 			break
 		}
@@ -42,8 +41,10 @@ async function main() {
 	process.chdir(buildDir)
 	if (!fs.existsSync('./ideamarket')) {
 		console.log('> Cloning ideamarket repository')
-		if(process.env.IDEAMARKET_CLONE_TOKEN) {
-			await executeCmd('git clone https://' + process.env.IDEAMARKET_CLONE_TOKEN + '@' + contractsRepo + ' ideamarket')
+		if (process.env.IDEAMARKET_CLONE_TOKEN) {
+			await executeCmd(
+				'git clone https://' + process.env.IDEAMARKET_CLONE_TOKEN + '@' + contractsRepo + ' ideamarket'
+			)
 		} else {
 			await executeCmd('git clone https://' + contractsRepo + ' ideamarket')
 		}
@@ -57,7 +58,7 @@ async function main() {
 	await executeCmd('git fetch origin master')
 	await executeCmd('git reset --hard origin/master')
 
-	if(fs.existsSync('./build/contracts')) {
+	if (fs.existsSync('./build/contracts')) {
 		console.log('> Cleaning old contract build')
 		cleanDirectory('./build/contracts')
 	}
@@ -86,11 +87,11 @@ async function main() {
 	contracts.forEach((contract) => {
 		const file = contract[0] + '.json'
 		const curPath = path.join('ideamarket/build/contracts/contracts/', contract[1], contract[0] + '.sol', file)
-		if(!curPath.endsWith('.json')) {
+		if (!curPath.endsWith('.json')) {
 			console.log('>     ignoring file ' + curPath)
 			return
 		}
-        
+
 		const rawArtifact = fs.readFileSync(curPath)
 		const jsonArtifact = JSON.parse(rawArtifact)
 		const abi = JSON.stringify(jsonArtifact.abi)
@@ -102,16 +103,16 @@ async function main() {
 	const rawDeployed = fs.readFileSync('ideamarket/deployed/deployed-' + network + '.json')
 	const jsonDeployed = JSON.parse(rawDeployed)
 	const jsonNetworkConfig = { network: network }
-	for(let i = 0; i < contracts.length; i++) {
+	for (let i = 0; i < contracts.length; i++) {
 		const contract = contracts[i][0].charAt(0).toLowerCase() + contracts[i][0].slice(1)
 		const addr = jsonDeployed[contract]
 		jsonNetworkConfig[contract] = addr
 	}
-    
+
 	// Hardcode the startblock values. Does not need to be accurate, just save some sync time
-	if(network === 'kovan') {
+	if (network === 'kovan') {
 		jsonNetworkConfig['startBlock'] = 21500000
-	} else if(network === 'mainnet') {
+	} else if (network === 'mainnet') {
 		jsonNetworkConfig['startBlock'] = 11000000
 	}
 
@@ -121,23 +122,23 @@ async function main() {
 	process.chdir('..')
 	console.log('> Generating subgraph.yaml')
 	let mustacheCmd = 'mustache'
-	if(process.platform === 'win32') {
+	if (process.platform === 'win32') {
 		mustacheCmd += '.cmd'
 	}
 	executeCmd(mustacheCmd + ' res/network-config.json subgraph.template.yaml > subgraph.yaml')
 
 	// Generate autogen files
-	if(fs.existsSync('generated')) {
+	if (fs.existsSync('generated')) {
 		deleteDirectory('generated')
 	}
 
-	if(fs.existsSync(path.join(buildDir, 'generated'))) {
+	if (fs.existsSync(path.join(buildDir, 'generated'))) {
 		deleteDirectory(path.join(buildDir, 'generated'))
 	}
 
 	console.log('> Generating autogen files')
 	let graphCmd = 'graph'
-	if(process.platform === 'win32') {
+	if (process.platform === 'win32') {
 		graphCmd += '.cmd'
 	}
 	executeCmd(graphCmd + ' codegen --output-dir ' + path.normalize(buildDir + '/generated'))
@@ -162,7 +163,7 @@ function deleteDirectory(dir) {
 
 async function executeCmd(cmd) {
 	return new Promise((resolve, reject) => {
-		exec(cmd, error => {
+		exec(cmd, (error) => {
 			if (error) {
 				reject(error)
 			} else {
