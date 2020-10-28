@@ -56,7 +56,7 @@ export function handleBlock(block: ethereum.Block): void {
 			update = true
 		} else if (dayPricePoints.length > 0) {
 			const latest = IdeaTokenPricePoint.load(token.latestPricePoint)
-			if (latest.timestamp === currentTS) {
+			if (latest.timestamp.equals(currentTS)) {
 				update = true
 			}
 		}
