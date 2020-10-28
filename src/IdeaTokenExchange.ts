@@ -8,7 +8,9 @@ import {
 	OwnershipChanged,
 	InvestedState,
 } from '../res/generated/IdeaTokenExchange/IdeaTokenExchange'
-import { IdeaToken, IdeaMarket, IdeaTokenExchange } from '../res/generated/schema'
+import { IdeaToken, IdeaMarket, IdeaTokenExchange, IdeaTokenVolumePoint } from '../res/generated/schema'
+
+const tenPow18 = BigDecimal.fromString('1000000000000000000')
 
 export function handleInvestedState(event: InvestedState): void {
 	const exchange = IdeaTokenExchange.load(event.address.toHex())
@@ -30,6 +32,20 @@ export function handleInvestedState(event: InvestedState): void {
 	token.invested = event.params.daiInvested
 	market.platformFeeInvested = event.params.platformFeeInvested
 	exchange.tradingFeeInvested = event.params.tradingFeeInvested
+
+	const volumePoint = new IdeaTokenVolumePoint(
+		token.id + '-' + event.block.number.toHex() + '-' + event.transaction.index.toHex()
+	)
+	volumePoint.token = token.id
+	volumePoint.timestamp = event.block.timestamp
+	volumePoint.block = event.block.number
+	volumePoint.txindex = event.transaction.index
+	volumePoint.volume = event.params.volume.toBigDecimal().div(tenPow18)
+	volumePoint.save()
+
+	const dayVolumePoints = token.dayVolumePoints
+	dayVolumePoints.push(volumePoint.id)
+	token.dayVolumePoints = dayVolumePoints
 
 	token.save()
 	market.save()

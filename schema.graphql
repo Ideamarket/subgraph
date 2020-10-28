@@ -26,6 +26,16 @@ type IdeaTokenPricePoint @entity {
   price: BigDecimal!
 }
 
+type IdeaTokenVolumePoint @entity {
+  "<token address>-<block>-<txindex>"
+  id: ID!
+  token: IdeaToken!
+  timestamp: BigInt!
+  block: BigInt!
+  txindex: BigInt!
+  volume: BigDecimal!
+}
+
 type IdeaTokenBalance @entity {
   "<account address>-<token address>"
   id: ID!
@@ -54,11 +64,13 @@ type IdeaToken @entity {
   daiInToken: BigInt!
   invested: BigInt!
   dayChange: BigDecimal!
+  dayVolume: BigDecimal!
   balances: [IdeaTokenBalance!]! @derivedFrom(field: "token")
   allowances: [IdeaTokenAllowance!]! @derivedFrom(field: "token")
   latestPricePoint: IdeaTokenPricePoint!
   dayPricePoints: [IdeaTokenPricePoint!]!
   pricePoints: [IdeaTokenPricePoint!]! @derivedFrom(field: "token")
+  dayVolumePoints: [IdeaTokenVolumePoint!]!
 }
 
 "============================================================ FACTORY ==========================================================" 

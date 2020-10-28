@@ -1,6 +1,12 @@
 import { Address, BigDecimal, BigInt, ethereum } from '@graphprotocol/graph-ts'
 import { NewMarket, NewToken, OwnershipChanged } from '../res/generated/IdeaTokenFactory/IdeaTokenFactory'
-import { IdeaMarket, IdeaToken, IdeaTokenFactory, IdeaTokenPricePoint } from '../res/generated/schema'
+import {
+	IdeaMarket,
+	IdeaToken,
+	IdeaTokenFactory,
+	IdeaTokenPricePoint,
+	IdeaTokenVolumePoint,
+} from '../res/generated/schema'
 
 const zeroAddress = Address.fromString('0x0000000000000000000000000000000000000000')
 const tenPow18 = BigDecimal.fromString('1000000000000000000')
@@ -20,9 +26,106 @@ const tenPow18 = BigDecimal.fromString('1000000000000000000')
 */
 
 export function handleBlock(block: ethereum.Block): void {
+	checkDayPricePoints(block)
+	checkDayVolumes(block)
+}
+
+function checkDayPricePoints(block: ethereum.Block): void {
 	const factory = IdeaTokenFactory.load('factory')
 	if (!factory) {
-		// Gets called on every block, factory might not be deployed yet
+		return
+	}
+
+	const currentTS = block.timestamp
+	const minTS = currentTS.minus(BigInt.fromI32(86400))
+
+	for (let i = 0; i < factory.allTokens.length; i++) {
+		const allTokens = factory.allTokens
+		const token = IdeaToken.load(allTokens[i])
+		if (!token) {
+			throw 'Failed to load token in handleBlock'
+		}
+
+		// ---- Price Points
+		let dayPricePoints = token.dayPricePoints
+		let dropPricePointsUntilIndex = 0
+		for (; dropPricePointsUntilIndex < dayPricePoints.length; dropPricePointsUntilIndex++) {
+			const pricePoint = IdeaTokenPricePoint.load(dayPricePoints[dropPricePointsUntilIndex])
+			if (!pricePoint) {
+				throw 'Failed to load price point in handleBlock'
+			}
+
+			if (pricePoint.timestamp.gt(minTS)) {
+				break
+			}
+		}
+
+		let updatePricePoints = false
+		if (dropPricePointsUntilIndex !== 0) {
+			token.dayPricePoints = dayPricePoints.slice(dropPricePointsUntilIndex + 1, token.dayPricePoints.length)
+			updatePricePoints = true
+		} else if (dayPricePoints.length > 0) {
+			const latest = IdeaTokenPricePoint.load(token.latestPricePoint)
+			if (latest.timestamp.equals(currentTS)) {
+				updatePricePoints = true
+			}
+		}
+
+		if (updatePricePoints) {
+			dayPricePoints = token.dayPricePoints
+			if (dayPricePoints.length === 0) {
+				token.dayChange = BigDecimal.fromString('0')
+			} else {
+				const startPricePoint = IdeaTokenPricePoint.load(dayPricePoints[0])
+				const endPricePoint = IdeaTokenPricePoint.load(dayPricePoints[dayPricePoints.length - 1])
+				token.dayChange = endPricePoint.price.div(startPricePoint.oldPrice).minus(BigDecimal.fromString('1'))
+			}
+		}
+
+		// ---- Volume Points
+		let dayVolumePoints = token.dayVolumePoints
+		let dropVolumePointsUntilIndex = 0
+		for (; dropVolumePointsUntilIndex < dayVolumePoints.length; dropVolumePointsUntilIndex++) {
+			const volumePoint = IdeaTokenVolumePoint.load(dayVolumePoints[dropVolumePointsUntilIndex])
+			if (!volumePoint) {
+				throw 'Failed to load volume point in handleBlock'
+			}
+
+			if (volumePoint.timestamp.gt(minTS)) {
+				break
+			}
+		}
+
+		let updateVolumePoints = false
+		if (dropVolumePointsUntilIndex !== 0) {
+			token.dayVolumePoints = dayVolumePoints.slice(dropVolumePointsUntilIndex + 1, token.dayVolumePoints.length)
+			updateVolumePoints = true
+		} else if (dayVolumePoints.length > 0) {
+			const latest = IdeaTokenVolumePoint.load(dayVolumePoints[dayVolumePoints.length - 1])
+			if (latest.timestamp.equals(currentTS)) {
+				updateVolumePoints = true
+			}
+		}
+
+		if (updateVolumePoints) {
+			dayVolumePoints = token.dayVolumePoints
+			let dayVolume = BigDecimal.fromString('0')
+			for (let c = 0; c < dayVolumePoints.length; c++) {
+				const volumePoint = IdeaTokenVolumePoint.load(dayVolumePoints[c])
+				dayVolume = dayVolume.plus(volumePoint.volume)
+			}
+			token.dayVolume = dayVolume
+		}
+
+		if (updatePricePoints || updateVolumePoints) {
+			token.save()
+		}
+	}
+}
+
+function checkDayVolumes(block: ethereum.Block): void {
+	const factory = IdeaTokenFactory.load('factory')
+	if (!factory) {
 		return
 	}
 
@@ -120,8 +223,10 @@ export function handleNewToken(event: NewToken): void {
 	token.daiInToken = BigInt.fromI32(0)
 	token.invested = BigInt.fromI32(0)
 	token.dayChange = BigDecimal.fromString('0')
+	token.dayVolume = BigDecimal.fromString('0')
 	token.latestPricePoint = pricePointID
 	token.dayPricePoints = [pricePointID]
+	token.dayVolumePoints = []
 	token.save()
 
 	const factory = IdeaTokenFactory.load('factory')
