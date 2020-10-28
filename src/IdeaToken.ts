@@ -134,5 +134,8 @@ function makePricePoint(
 }
 
 function calculateDecimalPriceFromSupply(currentSupply: BigInt, market: IdeaMarket): BigDecimal {
-	return market.baseCost.plus(currentSupply.times(market.priceRise)).toBigDecimal().div(tenPow18.times(tenPow18))
+	return market.baseCost
+		.plus(currentSupply.times(market.priceRise).div(BigInt.fromI32(10).pow(18)))
+		.toBigDecimal()
+		.div(tenPow18)
 }
