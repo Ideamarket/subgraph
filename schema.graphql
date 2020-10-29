@@ -1,3 +1,20 @@
+"======================================================== FULLTEXT SEARCH ======================================================" 
+type _Schema_
+  @fulltext(
+    name: "tokenNameSearch",
+    language: en
+    algorithm: rank,
+    include: [
+      {
+        entity: "IdeaToken",
+        fields: [
+          { name: "name" }
+        ]
+      }
+    ]
+  )
+
+
 "============================================================ MARKET ===========================================================" 
 type IdeaMarket @entity {
   "<market id>"
