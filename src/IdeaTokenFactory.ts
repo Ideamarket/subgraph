@@ -224,6 +224,7 @@ export function handleNewToken(event: NewToken): void {
 	token.invested = BigInt.fromI32(0)
 	token.dayChange = BigDecimal.fromString('0')
 	token.dayVolume = BigDecimal.fromString('0')
+	token.listedAt = event.block.timestamp
 	token.latestPricePoint = pricePointID
 	token.dayPricePoints = [pricePointID]
 	token.dayVolumePoints = []
