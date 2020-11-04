@@ -69,7 +69,7 @@ export function handleTransfer(event: Transfer): void {
 	} else {
 		let toBalance = IdeaTokenBalance.load(event.params.to.toHex() + '-' + token.id)
 		if (!toBalance) {
-			toBalance = new IdeaTokenBalance(event.params.to.toHex())
+			toBalance = new IdeaTokenBalance(event.params.to.toHex() + '-' + token.id)
 			toBalance.token = token.id
 			toBalance.amount = BigInt.fromI32(0)
 		}
