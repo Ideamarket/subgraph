@@ -5,7 +5,8 @@
 		"codegen": "graph codegen",
 		"build:kovan": "node build.js --kovan && graph build",
 		"build:mainnet": "node build.js --mainnet && graph build",
-		"deploy": "graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ Ideamarket/Ideamarket",
+		"deploy:kovan": "node build.js --kovan && graph build && graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ Ideamarket/IdeamarketKOVAN",
+		"deploy:mainnet": "node build.js --mainnet && graph build && graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ Ideamarket/Ideamarket",
 		"create-local": "graph create --node http://localhost:8020/ Ideamarket/Ideamarket",
 		"remove-local": "graph remove --node http://localhost:8020/ Ideamarket/Ideamarket",
 		"deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 Ideamarket/Ideamarket"
