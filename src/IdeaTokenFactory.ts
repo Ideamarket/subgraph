@@ -190,6 +190,7 @@ export function handleNewMarket(event: NewMarket): void {
 	market.platformFeeRate = event.params.platformFeeRate
 	market.platformFeeWithdrawer = zeroAddress
 	market.platformFeeInvested = BigInt.fromI32(0)
+	market.nameVerifier = event.params.nameVerifier
 	market.save()
 }
 

@@ -50,7 +50,7 @@ dataSources:
       blockHandlers:
         - handler: handleBlock
       eventHandlers:
-        - event: NewMarket(uint256,string,uint256,uint256,uint256,uint256)
+        - event: NewMarket(uint256,string,uint256,uint256,uint256,uint256,address)
           handler: handleNewMarket
         - event: NewToken(uint256,uint256,string,address)
           handler: handleNewToken
