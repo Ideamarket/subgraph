@@ -111,7 +111,7 @@ async function main() {
 
 	// Hardcode the startblock values. Does not need to be accurate, just save some sync time
 	if (network === 'kovan') {
-		jsonNetworkConfig['startBlock'] = 22030000
+		jsonNetworkConfig['startBlock'] = 22056700
 	} else if (network === 'mainnet') {
 		jsonNetworkConfig['startBlock'] = 11000000
 	}
