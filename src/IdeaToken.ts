@@ -70,8 +70,10 @@ export function handleTransfer(event: Transfer): void {
 		let toBalance = IdeaTokenBalance.load(event.params.to.toHex() + '-' + token.id)
 		if (!toBalance) {
 			toBalance = new IdeaTokenBalance(event.params.to.toHex() + '-' + token.id)
-			toBalance.token = token.id
+			toBalance.holder = event.params.to
 			toBalance.amount = BigInt.fromI32(0)
+			toBalance.token = token.id
+			toBalance.market = market.id
 		}
 		const beforeBalance = toBalance.amount
 		toBalance.amount = toBalance.amount.plus(event.params.value)

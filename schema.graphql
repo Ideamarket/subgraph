@@ -57,8 +57,10 @@ type IdeaTokenVolumePoint @entity {
 type IdeaTokenBalance @entity {
   "<account address>-<token address>"
   id: ID!
+  holder: Bytes!
   amount: BigInt!
   token: IdeaToken!
+  market: IdeaMarket!
 }
 
 type IdeaTokenAllowance @entity {
