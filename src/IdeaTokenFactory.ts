@@ -1,5 +1,5 @@
 import { Address, BigDecimal, BigInt, ethereum } from '@graphprotocol/graph-ts'
-import { NewMarket, NewToken, OwnershipChanged } from '../res/generated/IdeaTokenFactory/IdeaTokenFactory'
+import { NewMarket, NewToken, NewNameVerifier, OwnershipChanged } from '../res/generated/IdeaTokenFactory/IdeaTokenFactory'
 import {
 	IdeaMarket,
 	IdeaToken,
@@ -239,6 +239,16 @@ export function handleNewToken(event: NewToken): void {
 	allTokens.push(tokenID)
 	factory.allTokens = allTokens
 	factory.save()
+}
+
+export function handleNewNameVerifier(event: NewNameVerifier): void {
+	const market = IdeaMarket.load(event.params.marketID.toHex())
+	if (!market) {
+		throw 'IdeaMarket does not exist on NewNameVerifier event'
+	}
+
+	market.nameVerifier = event.params.nameVerifier
+	market.save()
 }
 
 export function handleOwnershipChanged(event: OwnershipChanged): void {

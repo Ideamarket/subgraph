@@ -43,6 +43,7 @@ dataSources:
       entities:
         - NewMarket
         - NewToken
+        - NewNameVerifier
         - OwnershipChanged
       abis:
         - name: IdeaTokenFactory
@@ -54,6 +55,8 @@ dataSources:
           handler: handleNewMarket
         - event: NewToken(uint256,uint256,string,address)
           handler: handleNewToken
+        - event: NewNameVerifier(uint256,address)
+          handler: handleNewNameVerifier
         - event: OwnershipChanged(address,address)
           handler: handleOwnershipChanged
       file: ./src/IdeaTokenFactory.ts
