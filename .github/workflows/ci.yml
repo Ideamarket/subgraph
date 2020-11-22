@@ -17,6 +17,6 @@ jobs:
             npm install -g @graphprotocol/graph-cli
       - name: Run build
         run: |
-            npm run-script build:kovan
+            npm run-script build:rinkeby
         env: 
             IDEAMARKET_CLONE_TOKEN: ${{ secrets.IDEAMARKET_CLONE_TOKEN }}
