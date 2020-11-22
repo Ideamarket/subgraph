@@ -3,9 +3,9 @@
 	"license": "UNLICENSED",
 	"scripts": {
 		"codegen": "graph codegen",
-		"build:kovan": "node build.js --kovan && graph build",
+		"build:rinkeby": "node build.js --rinkeby && graph build",
 		"build:mainnet": "node build.js --mainnet && graph build",
-		"deploy:kovan": "node build.js --kovan && graph build && graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ Ideamarket/IdeamarketKOVAN",
+		"deploy:rinkeby": "node build.js --rinkeby && graph build && graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ Ideamarket/IdeamarketRINKEBY",
 		"deploy:mainnet": "node build.js --mainnet && graph build && graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ Ideamarket/Ideamarket",
 		"create-local": "graph create --node http://localhost:8020/ Ideamarket/Ideamarket",
 		"remove-local": "graph remove --node http://localhost:8020/ Ideamarket/Ideamarket",

@@ -16,12 +16,12 @@ const contracts = [
 ]
 
 async function main() {
-	// Check for --kovan or --mainnet
+	// Check for --rinkeby or --mainnet
 	let network = ''
 
 	for (let i = 0; i < process.argv.length; i++) {
-		if (process.argv[i] === '--kovan') {
-			network = 'kovan'
+		if (process.argv[i] === '--rinkeby') {
+			network = 'rinkeby'
 			break
 		} else if (process.argv[i] === '--mainnet') {
 			network = 'mainnet'
@@ -110,8 +110,8 @@ async function main() {
 	}
 
 	// Hardcode the startblock values. Does not need to be accurate, just save some sync time
-	if (network === 'kovan') {
-		jsonNetworkConfig['startBlock'] = 22056700
+	if (network === 'rinkeby') {
+		jsonNetworkConfig['startBlock'] = 7590000
 	} else if (network === 'mainnet') {
 		jsonNetworkConfig['startBlock'] = 11000000
 	}
