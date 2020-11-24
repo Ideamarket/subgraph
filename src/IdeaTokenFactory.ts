@@ -1,5 +1,10 @@
 import { Address, BigDecimal, BigInt, ethereum } from '@graphprotocol/graph-ts'
-import { NewMarket, NewToken, NewNameVerifier, OwnershipChanged } from '../res/generated/IdeaTokenFactory/IdeaTokenFactory'
+import {
+	NewMarket,
+	NewToken,
+	NewNameVerifier,
+	OwnershipChanged,
+} from '../res/generated/IdeaTokenFactory/IdeaTokenFactory'
 import {
 	IdeaMarket,
 	IdeaToken,

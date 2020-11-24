@@ -70,7 +70,7 @@ export function handleNewPlatformFeeWithdrawer(event: NewPlatformFeeWithdrawer):
 	market.save()
 }
 
-export function handleDaiReddemed(event: DaiRedeemed): void {
+export function handleDaiRedeemed(event: DaiRedeemed): void {
 	const token = IdeaToken.load(event.params.ideaToken.toHex())
 	if (!token) {
 		throw 'IdeaToken does not exist on DaiRedeemed event'
