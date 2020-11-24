@@ -23,6 +23,7 @@ type IdeaMarket @entity {
   name: String!
   baseCost: BigInt!
   priceRise: BigInt!
+  hatchTokens: BigInt!
   tradingFeeRate: BigInt!
   platformFeeRate: BigInt!
   platformFeeWithdrawer: Bytes!

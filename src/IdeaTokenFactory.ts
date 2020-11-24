@@ -186,6 +186,7 @@ export function handleNewMarket(event: NewMarket): void {
 	market.name = event.params.name
 	market.baseCost = event.params.baseCost
 	market.priceRise = event.params.priceRise
+	market.hatchTokens = event.params.hatchTokens
 	market.tradingFeeRate = event.params.tradingFeeRate
 	market.platformFeeRate = event.params.platformFeeRate
 	market.platformFeeWithdrawer = zeroAddress
