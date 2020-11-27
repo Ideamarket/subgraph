@@ -16,12 +16,14 @@ const contracts = [
 ]
 
 async function main() {
-	// Check for --rinkeby or --mainnet
 	let network = ''
 
 	for (let i = 0; i < process.argv.length; i++) {
 		if (process.argv[i] === '--rinkeby') {
 			network = 'rinkeby'
+			break
+		} else if (process.argv[i] === '--test') {
+			network = 'test'
 			break
 		} else if (process.argv[i] === '--mainnet') {
 			network = 'mainnet'
@@ -102,7 +104,7 @@ async function main() {
 	console.log('> Extracting deployed addresses')
 	const rawDeployed = fs.readFileSync('ideamarket/deployed/deployed-' + network + '.json')
 	const jsonDeployed = JSON.parse(rawDeployed)
-	const jsonNetworkConfig = { network: network }
+	const jsonNetworkConfig = { network: network === 'test' ? 'rinkeby' : network }
 	for (let i = 0; i < contracts.length; i++) {
 		const contract = contracts[i][0].charAt(0).toLowerCase() + contracts[i][0].slice(1)
 		const addr = jsonDeployed[contract]
@@ -112,7 +114,10 @@ async function main() {
 	// Hardcode the startblock values. Does not need to be accurate, just save some sync time
 	if (network === 'rinkeby') {
 		jsonNetworkConfig['startBlock'] = 7590000
-	} else if (network === 'mainnet') {
+	} else if (network === 'test') {
+		jsonNetworkConfig['startBlock'] = 7620000
+	}
+	 else if (network === 'mainnet') {
 		jsonNetworkConfig['startBlock'] = 11000000
 	}
 
