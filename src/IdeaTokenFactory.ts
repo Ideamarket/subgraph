@@ -31,11 +31,10 @@ const tenPow18 = BigDecimal.fromString('1000000000000000000')
 */
 
 export function handleBlock(block: ethereum.Block): void {
-	checkDayPricePoints(block)
-	checkDayVolumes(block)
+	checkDayPriceAndVolumePoints(block)
 }
 
-function checkDayPricePoints(block: ethereum.Block): void {
+function checkDayPriceAndVolumePoints(block: ethereum.Block): void {
 	const factory = IdeaTokenFactory.load('factory')
 	if (!factory) {
 		return
@@ -123,62 +122,6 @@ function checkDayPricePoints(block: ethereum.Block): void {
 		}
 
 		if (updatePricePoints || updateVolumePoints) {
-			token.save()
-		}
-	}
-}
-
-function checkDayVolumes(block: ethereum.Block): void {
-	const factory = IdeaTokenFactory.load('factory')
-	if (!factory) {
-		return
-	}
-
-	const currentTS = block.timestamp
-	const minTS = currentTS.minus(BigInt.fromI32(86400))
-
-	for (let i = 0; i < factory.allTokens.length; i++) {
-		const allTokens = factory.allTokens
-		const token = IdeaToken.load(allTokens[i])
-		if (!token) {
-			throw 'Failed to load token in handleBlock'
-		}
-
-		let dayPricePoints = token.dayPricePoints
-
-		let dropUntilIndex = 0
-		for (; dropUntilIndex < dayPricePoints.length; dropUntilIndex++) {
-			const pricePoint = IdeaTokenPricePoint.load(dayPricePoints[dropUntilIndex])
-			if (!pricePoint) {
-				throw 'Failed to load price point in handleBlock'
-			}
-
-			if (pricePoint.timestamp.gt(minTS)) {
-				break
-			}
-		}
-
-		let update = false
-		if (dropUntilIndex !== 0) {
-			token.dayPricePoints = dayPricePoints.slice(dropUntilIndex + 1, token.dayPricePoints.length)
-			update = true
-		} else if (dayPricePoints.length > 0) {
-			const latest = IdeaTokenPricePoint.load(token.latestPricePoint)
-			if (latest.timestamp.equals(currentTS)) {
-				update = true
-			}
-		}
-
-		if (update) {
-			dayPricePoints = token.dayPricePoints
-			if (dayPricePoints.length === 0) {
-				token.dayChange = BigDecimal.fromString('0')
-			} else {
-				const startPricePoint = IdeaTokenPricePoint.load(dayPricePoints[0])
-				const endPricePoint = IdeaTokenPricePoint.load(dayPricePoints[dayPricePoints.length - 1])
-				token.dayChange = endPricePoint.price.div(startPricePoint.oldPrice).minus(BigDecimal.fromString('1'))
-			}
-
 			token.save()
 		}
 	}
