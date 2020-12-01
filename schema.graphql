@@ -88,8 +88,8 @@ type IdeaToken @entity {
   listedAt: BigInt! 
   balances: [IdeaTokenBalance!]! @derivedFrom(field: "token")
   allowances: [IdeaTokenAllowance!]! @derivedFrom(field: "token")
-  pricePoints: [IdeaTokenPricePoint!]!
-  volumePoints: [IdeaTokenVolumePoint!]!
+  pricePoints: [IdeaTokenPricePoint!]! @derivedFrom(field: "token")
+  volumePoints: [IdeaTokenVolumePoint!]! @derivedFrom(field: "token")
 }
 
 "============================================================ FACTORY ==========================================================" 
