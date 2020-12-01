@@ -48,8 +48,6 @@ dataSources:
       abis:
         - name: IdeaTokenFactory
           file: ./res/abis/IdeaTokenFactory.json
-      blockHandlers:
-        - handler: handleBlock
       eventHandlers:
         - event: NewMarket(uint256,string,uint256,uint256,uint256,uint256,uint256,address)
           handler: handleNewMarket

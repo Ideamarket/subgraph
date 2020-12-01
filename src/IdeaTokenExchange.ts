@@ -33,19 +33,29 @@ export function handleInvestedState(event: InvestedState): void {
 	market.platformFeeInvested = event.params.platformFeeInvested
 	exchange.tradingFeeInvested = event.params.tradingFeeInvested
 
-	const volumePoint = new IdeaTokenVolumePoint(
-		token.id + '-' + event.block.number.toHex() + '-' + event.transaction.index.toHex()
-	)
-	volumePoint.token = token.id
-	volumePoint.timestamp = event.block.timestamp
-	volumePoint.block = event.block.number
-	volumePoint.txindex = event.transaction.index
-	volumePoint.volume = event.params.volume.toBigDecimal().div(tenPow18)
-	volumePoint.save()
+	const lastIndex = token.volumePoints.length - 1
+	const cpy = token.volumePoints
+	const oldVolumePoint = IdeaTokenVolumePoint.load(cpy[lastIndex])
 
-	const dayVolumePoints = token.dayVolumePoints
-	dayVolumePoints.push(volumePoint.id)
-	token.dayVolumePoints = dayVolumePoints
+	if (oldVolumePoint.block === event.block.number && oldVolumePoint.txindex === event.transaction.index) {
+		oldVolumePoint.volume = oldVolumePoint.volume.plus(event.params.volume.toBigDecimal().div(tenPow18))
+		oldVolumePoint.save()
+	} else {
+		const newVolumePoint = new IdeaTokenVolumePoint(
+			token.id + '-' + event.block.number.toHex() + '-' + event.transaction.index.toHex()
+		)
+		newVolumePoint.token = token.id
+		newVolumePoint.timestamp = event.block.timestamp
+		newVolumePoint.block = event.block.number
+		newVolumePoint.txindex = event.transaction.index
+		newVolumePoint.oldVolume = oldVolumePoint.volume
+		newVolumePoint.volume = oldVolumePoint.volume.plus(event.params.volume.toBigDecimal().div(tenPow18))
+		newVolumePoint.save()
+
+		const volumePoints = token.volumePoints
+		volumePoints.push(newVolumePoint.id)
+		token.volumePoints = volumePoints
+	}
 
 	token.save()
 	market.save()
