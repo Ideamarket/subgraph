@@ -47,7 +47,7 @@ export function handleInvestedState(event: InvestedState): void {
 		newVolumePoint.timestamp = event.block.timestamp
 		newVolumePoint.block = event.block.number
 		newVolumePoint.txindex = event.transaction.index
-		newVolumePoint.volume = oldVolumePoint.volume.plus(event.params.volume.toBigDecimal().div(tenPow18))
+		newVolumePoint.volume = event.params.volume.toBigDecimal().div(tenPow18)
 		newVolumePoint.save()
 
 		const dayVolumePoints = token.dayVolumePoints
