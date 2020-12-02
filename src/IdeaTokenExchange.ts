@@ -33,19 +33,27 @@ export function handleInvestedState(event: InvestedState): void {
 	market.platformFeeInvested = event.params.platformFeeInvested
 	exchange.tradingFeeInvested = event.params.tradingFeeInvested
 
-	const volumePoint = new IdeaTokenVolumePoint(
+	const oldVolumePoint = IdeaTokenVolumePoint.load(
 		token.id + '-' + event.block.number.toHex() + '-' + event.transaction.index.toHex()
 	)
-	volumePoint.token = token.id
-	volumePoint.timestamp = event.block.timestamp
-	volumePoint.block = event.block.number
-	volumePoint.txindex = event.transaction.index
-	volumePoint.volume = event.params.volume.toBigDecimal().div(tenPow18)
-	volumePoint.save()
+	if (oldVolumePoint) {
+		oldVolumePoint.volume = oldVolumePoint.volume.plus(event.params.volume.toBigDecimal().div(tenPow18))
+		oldVolumePoint.save()
+	} else {
+		const newVolumePoint = new IdeaTokenVolumePoint(
+			token.id + '-' + event.block.number.toHex() + '-' + event.transaction.index.toHex()
+		)
+		newVolumePoint.token = token.id
+		newVolumePoint.timestamp = event.block.timestamp
+		newVolumePoint.block = event.block.number
+		newVolumePoint.txindex = event.transaction.index
+		newVolumePoint.volume = oldVolumePoint.volume.plus(event.params.volume.toBigDecimal().div(tenPow18))
+		newVolumePoint.save()
 
-	const dayVolumePoints = token.dayVolumePoints
-	dayVolumePoints.push(volumePoint.id)
-	token.dayVolumePoints = dayVolumePoints
+		const dayVolumePoints = token.dayVolumePoints
+		dayVolumePoints.push(newVolumePoint.id)
+		token.dayVolumePoints = dayVolumePoints
+	}
 
 	token.save()
 	market.save()
