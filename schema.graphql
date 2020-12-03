@@ -87,6 +87,7 @@ type IdeaToken @entity {
   dayChange: BigDecimal!
   dayVolume: BigDecimal!
   listedAt: BigInt! 
+  lockedAmount: BigInt!
   balances: [IdeaTokenBalance!]! @derivedFrom(field: "token")
   allowances: [IdeaTokenAllowance!]! @derivedFrom(field: "token")
   latestPricePoint: IdeaTokenPricePoint!
@@ -109,4 +110,20 @@ type IdeaTokenExchange @entity {
   id: ID!
   owner: Bytes!
   tradingFeeInvested: BigInt!
+}
+
+"============================================================== VAULT ===========================================================" 
+type IdeaTokenVault @entity {
+  "id: vault"
+  id: ID!
+  futureUnlockedAmounts: [LockedIdeaTokenAmount!]!
+}
+
+type LockedIdeaTokenAmount @entity {
+  "<token address-owner address-index>"
+  id: ID!
+  token: IdeaToken!
+  owner: Bytes!
+  amount: BigInt!
+  lockedUntil: BigInt!
 }

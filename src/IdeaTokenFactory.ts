@@ -10,7 +10,9 @@ import {
 	IdeaToken,
 	IdeaTokenFactory,
 	IdeaTokenPricePoint,
+	IdeaTokenVault,
 	IdeaTokenVolumePoint,
+	LockedIdeaTokenAmount,
 } from '../res/generated/schema'
 
 const zeroAddress = Address.fromString('0x0000000000000000000000000000000000000000')
@@ -32,6 +34,7 @@ const tenPow18 = BigDecimal.fromString('1000000000000000000')
 
 export function handleBlock(block: ethereum.Block): void {
 	checkDayPriceAndVolumePoints(block)
+	checkLockedTokens(block)
 }
 
 function checkDayPriceAndVolumePoints(block: ethereum.Block): void {
@@ -127,6 +130,44 @@ function checkDayPriceAndVolumePoints(block: ethereum.Block): void {
 	}
 }
 
+function checkLockedTokens(block: ethereum.Block): void {
+	const vault = IdeaTokenVault.load('vault')
+	if (!vault) {
+		return
+	}
+
+	const futureUnlockedAmounts = vault.futureUnlockedAmounts
+	const currentTS = block.timestamp
+
+	let hadChange = false
+	while (futureUnlockedAmounts.length > 0) {
+		const futureUnlockedAmount = LockedIdeaTokenAmount.load(futureUnlockedAmounts[0])
+		if (!futureUnlockedAmount) {
+			throw 'LockedIdeaTokenAmount not found'
+		}
+
+		if (currentTS.lt(futureUnlockedAmount.lockedUntil)) {
+			break
+		}
+
+		hadChange = true
+
+		const token = IdeaToken.load(futureUnlockedAmount.token)
+		if (!token) {
+			throw 'IdeaToken not found'
+		}
+		token.lockedAmount = token.lockedAmount.minus(futureUnlockedAmount.amount)
+		token.save()
+
+		futureUnlockedAmounts.shift()
+	}
+
+	if (hadChange) {
+		vault.futureUnlockedAmounts = futureUnlockedAmounts
+		vault.save()
+	}
+}
+
 export function handleNewMarket(event: NewMarket): void {
 	const market = new IdeaMarket(event.params.id.toHex())
 
@@ -175,6 +216,7 @@ export function handleNewToken(event: NewToken): void {
 	token.dayChange = BigDecimal.fromString('0')
 	token.dayVolume = BigDecimal.fromString('0')
 	token.listedAt = event.block.timestamp
+	token.lockedAmount = BigInt.fromI32(0)
 	token.latestPricePoint = pricePointID
 	token.dayPricePoints = [pricePointID]
 	token.dayVolumePoints = []

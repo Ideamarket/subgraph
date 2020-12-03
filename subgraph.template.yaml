@@ -100,3 +100,25 @@ dataSources:
         - event: OwnershipChanged(address,address)
           handler: handleOwnershipChanged
       file: ./src/IdeaTokenExchange.ts
+  # ============================== IdeaTokenVault ==============================
+  - kind: ethereum/contract
+    name: IdeaTokenVault
+    network: {{ network }}
+    source:
+      address: "{{ ideaTokenVault }}"
+      abi: IdeaTokenVault
+      startBlock: {{ startBlock }}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - IdeaTokenVault
+        - LockedIdeaTokenAmount
+      abis:
+        - name: IdeaTokenVault
+          file: ./res/abis/IdeaTokenVault.json
+      eventHandlers:
+        - event: Locked(address,address,uint256,uint256,uint256)
+          handler: handleLocked
+      file: ./src/IdeaTokenVault.ts

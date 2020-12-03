@@ -13,6 +13,7 @@ const contracts = [
 	['IdeaToken', 'core'],
 	['IdeaTokenFactory', 'core'],
 	['IdeaTokenExchange', 'core'],
+	['IdeaTokenVault', 'core'],
 ]
 
 async function main() {
