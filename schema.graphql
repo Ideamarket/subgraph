@@ -120,7 +120,7 @@ type IdeaTokenVault @entity {
 }
 
 type LockedIdeaTokenAmount @entity {
-  "<token address-owner address-index>"
+  "<tx hash>-<log index>"
   id: ID!
   token: IdeaToken!
   owner: Bytes!
