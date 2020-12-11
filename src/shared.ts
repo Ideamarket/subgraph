@@ -22,8 +22,10 @@ export function loadBlockHandlerValues(): BlockHandlerValues {
 }
 
 export function addFutureDayValueChange(token: IdeaToken, currentTs: BigInt): void {
-	let futureDayValueChange = FutureDayValueChange.load(token.id + '-' + currentTs.toString())
+	let id = token.id + '-' + currentTs.toString()
+	let futureDayValueChange = FutureDayValueChange.load(id)
 	if (!futureDayValueChange) {
+		futureDayValueChange = new FutureDayValueChange(id)
 		futureDayValueChange.token = token.id
 		futureDayValueChange.ts = currentTs.plus(BigInt.fromI32(SECONDS_PER_DAY))
 		futureDayValueChange.save()
