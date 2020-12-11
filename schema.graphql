@@ -88,6 +88,7 @@ type IdeaToken @entity {
   dayVolume: BigDecimal!
   listedAt: BigInt! 
   lockedAmount: BigInt!
+  lockedPercentage: BigDecimal!
   balances: [IdeaTokenBalance!]! @derivedFrom(field: "token")
   allowances: [IdeaTokenAllowance!]! @derivedFrom(field: "token")
   latestPricePoint: IdeaTokenPricePoint!

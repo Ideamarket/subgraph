@@ -15,8 +15,8 @@ import {
 	LockedIdeaTokenAmount,
 } from '../res/generated/schema'
 
-const zeroAddress = Address.fromString('0x0000000000000000000000000000000000000000')
-const tenPow18 = BigDecimal.fromString('1000000000000000000')
+import { updateLockedPercentage } from './IdeaTokenVault'
+import { TEN_POW_18, ZERO_ADDRESS, bigIntToBigDecimal } from './shared'
 
 /*
 	// https://thegraph.com/docs/assemblyscript-api#api-reference
@@ -38,17 +38,17 @@ export function handleBlock(block: ethereum.Block): void {
 }
 
 function checkDayPriceAndVolumePoints(block: ethereum.Block): void {
-	const factory = IdeaTokenFactory.load('factory')
+	let factory = IdeaTokenFactory.load('factory')
 	if (!factory) {
 		return
 	}
 
-	const currentTS = block.timestamp
-	const minTS = currentTS.minus(BigInt.fromI32(86400))
+	let currentTS = block.timestamp
+	let minTS = currentTS.minus(BigInt.fromI32(86400))
 
 	for (let i = 0; i < factory.allTokens.length; i++) {
-		const allTokens = factory.allTokens
-		const token = IdeaToken.load(allTokens[i])
+		let allTokens = factory.allTokens
+		let token = IdeaToken.load(allTokens[i])
 		if (!token) {
 			throw 'Failed to load token in handleBlock'
 		}
@@ -57,7 +57,7 @@ function checkDayPriceAndVolumePoints(block: ethereum.Block): void {
 		let dayPricePoints = token.dayPricePoints
 		let dropPricePointsUntilIndex = 0
 		for (; dropPricePointsUntilIndex < dayPricePoints.length; dropPricePointsUntilIndex++) {
-			const pricePoint = IdeaTokenPricePoint.load(dayPricePoints[dropPricePointsUntilIndex])
+			let pricePoint = IdeaTokenPricePoint.load(dayPricePoints[dropPricePointsUntilIndex])
 			if (!pricePoint) {
 				throw 'Failed to load price point in handleBlock'
 			}
@@ -72,7 +72,7 @@ function checkDayPriceAndVolumePoints(block: ethereum.Block): void {
 			token.dayPricePoints = dayPricePoints.slice(dropPricePointsUntilIndex + 1, token.dayPricePoints.length)
 			updatePricePoints = true
 		} else if (dayPricePoints.length > 0) {
-			const latest = IdeaTokenPricePoint.load(token.latestPricePoint)
+			let latest = IdeaTokenPricePoint.load(token.latestPricePoint)
 			if (latest.timestamp.equals(currentTS)) {
 				updatePricePoints = true
 			}
@@ -83,8 +83,8 @@ function checkDayPriceAndVolumePoints(block: ethereum.Block): void {
 			if (dayPricePoints.length === 0) {
 				token.dayChange = BigDecimal.fromString('0')
 			} else {
-				const startPricePoint = IdeaTokenPricePoint.load(dayPricePoints[0])
-				const endPricePoint = IdeaTokenPricePoint.load(dayPricePoints[dayPricePoints.length - 1])
+				let startPricePoint = IdeaTokenPricePoint.load(dayPricePoints[0])
+				let endPricePoint = IdeaTokenPricePoint.load(dayPricePoints[dayPricePoints.length - 1])
 				token.dayChange = endPricePoint.price.div(startPricePoint.oldPrice).minus(BigDecimal.fromString('1'))
 			}
 		}
@@ -93,7 +93,7 @@ function checkDayPriceAndVolumePoints(block: ethereum.Block): void {
 		let dayVolumePoints = token.dayVolumePoints
 		let dropVolumePointsUntilIndex = 0
 		for (; dropVolumePointsUntilIndex < dayVolumePoints.length; dropVolumePointsUntilIndex++) {
-			const volumePoint = IdeaTokenVolumePoint.load(dayVolumePoints[dropVolumePointsUntilIndex])
+			let volumePoint = IdeaTokenVolumePoint.load(dayVolumePoints[dropVolumePointsUntilIndex])
 			if (!volumePoint) {
 				throw 'Failed to load volume point in handleBlock'
 			}
@@ -108,7 +108,7 @@ function checkDayPriceAndVolumePoints(block: ethereum.Block): void {
 			token.dayVolumePoints = dayVolumePoints.slice(dropVolumePointsUntilIndex + 1, token.dayVolumePoints.length)
 			updateVolumePoints = true
 		} else if (dayVolumePoints.length > 0) {
-			const latest = IdeaTokenVolumePoint.load(dayVolumePoints[dayVolumePoints.length - 1])
+			let latest = IdeaTokenVolumePoint.load(dayVolumePoints[dayVolumePoints.length - 1])
 			if (latest.timestamp.equals(currentTS)) {
 				updateVolumePoints = true
 			}
@@ -118,7 +118,7 @@ function checkDayPriceAndVolumePoints(block: ethereum.Block): void {
 			dayVolumePoints = token.dayVolumePoints
 			let dayVolume = BigDecimal.fromString('0')
 			for (let c = 0; c < dayVolumePoints.length; c++) {
-				const volumePoint = IdeaTokenVolumePoint.load(dayVolumePoints[c])
+				let volumePoint = IdeaTokenVolumePoint.load(dayVolumePoints[c])
 				dayVolume = dayVolume.plus(volumePoint.volume)
 			}
 			token.dayVolume = dayVolume
@@ -131,37 +131,45 @@ function checkDayPriceAndVolumePoints(block: ethereum.Block): void {
 }
 
 function checkLockedTokens(block: ethereum.Block): void {
-	const vault = IdeaTokenVault.load('vault')
+	// If the `vault` is not created yet there can be no locked entries
+	let vault = IdeaTokenVault.load('vault')
 	if (!vault) {
 		return
 	}
 
-	const futureUnlockedAmounts = vault.futureUnlockedAmounts
-	const currentTS = block.timestamp
+	let futureUnlockedAmounts = vault.futureUnlockedAmounts
+	let currentTS = block.timestamp
 
+	// Iterate over `futureUnlockedAmounts`
 	let hadChange = false
 	while (futureUnlockedAmounts.length > 0) {
-		const futureUnlockedAmount = LockedIdeaTokenAmount.load(futureUnlockedAmounts[0])
+		let futureUnlockedAmount = LockedIdeaTokenAmount.load(futureUnlockedAmounts[0])
 		if (!futureUnlockedAmount) {
 			throw 'LockedIdeaTokenAmount not found'
 		}
 
+		// The list is ordered ascending. We can exit early
 		if (currentTS.lt(futureUnlockedAmount.lockedUntil)) {
 			break
 		}
 
 		hadChange = true
 
-		const token = IdeaToken.load(futureUnlockedAmount.token)
+		let token = IdeaToken.load(futureUnlockedAmount.token)
 		if (!token) {
 			throw 'IdeaToken not found'
 		}
+
+		// Update the tokens locked amount and percentage
 		token.lockedAmount = token.lockedAmount.minus(futureUnlockedAmount.amount)
+		updateLockedPercentage(token as IdeaToken)
 		token.save()
 
+		// Drop this `LockedIdeaTokenAmount` from the list
 		futureUnlockedAmounts.shift()
 	}
 
+	// Only save when we had a change, this saves sync time
 	if (hadChange) {
 		vault.futureUnlockedAmounts = futureUnlockedAmounts
 		vault.save()
@@ -169,7 +177,7 @@ function checkLockedTokens(block: ethereum.Block): void {
 }
 
 export function handleNewMarket(event: NewMarket): void {
-	const market = new IdeaMarket(event.params.id.toHex())
+	let market = new IdeaMarket(event.params.id.toHex())
 
 	market.marketID = event.params.id.toI32()
 	market.name = event.params.name
@@ -178,62 +186,63 @@ export function handleNewMarket(event: NewMarket): void {
 	market.hatchTokens = event.params.hatchTokens
 	market.tradingFeeRate = event.params.tradingFeeRate
 	market.platformFeeRate = event.params.platformFeeRate
-	market.platformFeeWithdrawer = zeroAddress
+	market.platformFeeWithdrawer = ZERO_ADDRESS
 	market.platformFeeInvested = BigInt.fromI32(0)
 	market.nameVerifier = event.params.nameVerifier
 	market.save()
 }
 
 export function handleNewToken(event: NewToken): void {
-	const market = IdeaMarket.load(event.params.marketID.toHex())
+	let market = IdeaMarket.load(event.params.marketID.toHex())
 	if (!market) {
 		throw 'IdeaMarket does not exist on NewToken event'
 	}
 
-	const tokenID = event.params.addr.toHex()
+	let tokenID = event.params.addr.toHex()
 
-	const pricePointID = tokenID + '-' + event.block.number.toHex() + '-' + event.transaction.index.toHex()
-	const pricePoint = new IdeaTokenPricePoint(pricePointID)
+	let pricePointID = tokenID + '-' + event.block.number.toHex() + '-' + event.transaction.index.toHex()
+	let pricePoint = new IdeaTokenPricePoint(pricePointID)
 	pricePoint.token = tokenID
 	pricePoint.timestamp = event.block.timestamp
 	pricePoint.block = event.block.number
 	pricePoint.txindex = event.transaction.index
-	pricePoint.oldPrice = market.baseCost.toBigDecimal().div(tenPow18)
-	pricePoint.price = market.baseCost.toBigDecimal().div(tenPow18)
+	pricePoint.oldPrice = bigIntToBigDecimal(market.baseCost, TEN_POW_18)
+	pricePoint.price = bigIntToBigDecimal(market.baseCost, TEN_POW_18)
 	pricePoint.save()
 
-	const token = new IdeaToken(tokenID)
+	let token = new IdeaToken(tokenID)
 	token.tokenID = event.params.id.toI32()
 	token.market = market.id
 	token.name = event.params.name
 	token.supply = BigInt.fromI32(0)
 	token.holders = 0
 	token.marketCap = BigInt.fromI32(0)
-	token.owner = zeroAddress
-	token.interestWithdrawer = zeroAddress
+	token.owner = ZERO_ADDRESS
+	token.interestWithdrawer = ZERO_ADDRESS
 	token.daiInToken = BigInt.fromI32(0)
 	token.invested = BigInt.fromI32(0)
 	token.dayChange = BigDecimal.fromString('0')
 	token.dayVolume = BigDecimal.fromString('0')
 	token.listedAt = event.block.timestamp
 	token.lockedAmount = BigInt.fromI32(0)
+	token.lockedPercentage = BigDecimal.fromString('0.0')
 	token.latestPricePoint = pricePointID
 	token.dayPricePoints = [pricePointID]
 	token.dayVolumePoints = []
 	token.save()
 
-	const factory = IdeaTokenFactory.load('factory')
+	let factory = IdeaTokenFactory.load('factory')
 	if (!factory) {
 		throw 'IdeaTokenFactory does not exist on NewToken event'
 	}
-	const allTokens = factory.allTokens
+	let allTokens = factory.allTokens
 	allTokens.push(tokenID)
 	factory.allTokens = allTokens
 	factory.save()
 }
 
 export function handleNewNameVerifier(event: NewNameVerifier): void {
-	const market = IdeaMarket.load(event.params.marketID.toHex())
+	let market = IdeaMarket.load(event.params.marketID.toHex())
 	if (!market) {
 		throw 'IdeaMarket does not exist on NewNameVerifier event'
 	}

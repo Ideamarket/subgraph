@@ -8,39 +8,47 @@ import {
 	IdeaTokenPricePoint,
 } from '../res/generated/schema'
 
-const zeroAddress = Address.fromString('0x0000000000000000000000000000000000000000')
-const tenPow18 = BigDecimal.fromString('1000000000000000000')
+import { updateLockedPercentage } from './IdeaTokenVault'
+
+import { ZERO_ADDRESS, TEN_POW_18, bigIntToBigDecimal } from './shared'
 
 export function handleTransfer(event: Transfer): void {
-	const token = IdeaToken.load(event.address.toHex())
+	let token = IdeaToken.load(event.address.toHex())
 	if (!token) {
 		return
 	}
-	const market = IdeaMarket.load(token.market)
+	let market = IdeaMarket.load(token.market)
 	if (!market) {
 		throw 'Market does not exist on Transfer event'
 	}
 
-	if (event.params.from.equals(zeroAddress)) {
+	if (event.params.from.equals(ZERO_ADDRESS)) {
+		// Transfer from the zero address is mint. Increase supply
 		token.supply = token.supply.plus(event.params.value)
+		updateLockedPercentage(token as IdeaToken)
 		addPricePoint(token as IdeaToken, market as IdeaMarket, event as Transfer)
 	} else {
-		const fromBalance = IdeaTokenBalance.load(event.params.from.toHex() + '-' + token.id)
+		// Transfer not from zero address. Decrease balance
+		let fromBalance = IdeaTokenBalance.load(event.params.from.toHex() + '-' + token.id)
 		if (!fromBalance) {
 			throw 'FromBalance is not defined on Transfer event'
 		}
 		fromBalance.amount = fromBalance.amount.minus(event.params.value)
 		fromBalance.save()
 
+		// If the balance is decreased to zero remove one holder
 		if (fromBalance.amount.equals(BigInt.fromI32(0))) {
 			token.holders = token.holders - 1
 		}
 	}
 
-	if (event.params.to.equals(zeroAddress)) {
+	if (event.params.to.equals(ZERO_ADDRESS)) {
+		// Transfer to the zero address is burn. Decrease supply
 		token.supply = token.supply.minus(event.params.value)
+		updateLockedPercentage(token as IdeaToken)
 		addPricePoint(token as IdeaToken, market as IdeaMarket, event as Transfer)
 	} else {
+		// Transfer not to zero address. Increase balance
 		let toBalance = IdeaTokenBalance.load(event.params.to.toHex() + '-' + token.id)
 		if (!toBalance) {
 			toBalance = new IdeaTokenBalance(event.params.to.toHex() + '-' + token.id)
@@ -49,10 +57,11 @@ export function handleTransfer(event: Transfer): void {
 			toBalance.token = token.id
 			toBalance.market = market.id
 		}
-		const beforeBalance = toBalance.amount
+		let beforeBalance = toBalance.amount
 		toBalance.amount = toBalance.amount.plus(event.params.value)
 		toBalance.save()
 
+		// If the balance is was zero before and now is greater than zero add one holder
 		if (beforeBalance.equals(BigInt.fromI32(0)) && !toBalance.amount.equals(BigInt.fromI32(0))) {
 			token.holders = token.holders + 1
 		}
@@ -62,12 +71,12 @@ export function handleTransfer(event: Transfer): void {
 }
 
 export function handleApproval(event: Approval): void {
-	const token = IdeaToken.load(event.address.toHex())
+	let token = IdeaToken.load(event.address.toHex())
 	if (!token) {
 		return
 	}
 
-	const allowanceID = event.params.owner.toHex() + '-' + event.params.spender.toHex() + '-' + token.id
+	let allowanceID = event.params.owner.toHex() + '-' + event.params.spender.toHex() + '-' + token.id
 	let allowance = IdeaTokenAllowance.load(allowanceID)
 	if (!allowance) {
 		allowance = new IdeaTokenAllowance(allowanceID)
@@ -80,7 +89,7 @@ export function handleApproval(event: Approval): void {
 }
 
 export function handleOwnershipChanged(event: OwnershipChanged): void {
-	const token = IdeaToken.load(event.address.toHex())
+	let token = IdeaToken.load(event.address.toHex())
 	if (!token) {
 		return
 	}
@@ -90,13 +99,13 @@ export function handleOwnershipChanged(event: OwnershipChanged): void {
 }
 
 function addPricePoint(token: IdeaToken, market: IdeaMarket, event: Transfer): void {
-	const oldPricePoint = IdeaTokenPricePoint.load(token.latestPricePoint)
+	let oldPricePoint = IdeaTokenPricePoint.load(token.latestPricePoint)
 
 	if (oldPricePoint.block === event.block.number && oldPricePoint.txindex === event.transaction.index) {
 		oldPricePoint.price = calculateDecimalPriceFromSupply(token.supply, market)
 		oldPricePoint.save()
 	} else {
-		const newPricePoint = new IdeaTokenPricePoint(
+		let newPricePoint = new IdeaTokenPricePoint(
 			token.id + '-' + event.block.number.toHex() + '-' + event.transaction.index.toHex()
 		)
 		newPricePoint.token = token.id
@@ -108,7 +117,7 @@ function addPricePoint(token: IdeaToken, market: IdeaMarket, event: Transfer): v
 		newPricePoint.save()
 
 		token.latestPricePoint = newPricePoint.id
-		const dayPricePoints = token.dayPricePoints
+		let dayPricePoints = token.dayPricePoints
 		dayPricePoints.push(newPricePoint.id)
 		token.dayPricePoints = dayPricePoints
 	}
@@ -116,13 +125,13 @@ function addPricePoint(token: IdeaToken, market: IdeaMarket, event: Transfer): v
 
 function calculateDecimalPriceFromSupply(currentSupply: BigInt, market: IdeaMarket): BigDecimal {
 	if (currentSupply.lt(market.hatchTokens)) {
-		return market.baseCost.toBigDecimal().div(tenPow18)
+		return bigIntToBigDecimal(market.baseCost, TEN_POW_18)
 	}
 
-	const updatedSupply = currentSupply.minus(market.hatchTokens)
+	let updatedSupply = currentSupply.minus(market.hatchTokens)
 
-	return market.baseCost
-		.plus(updatedSupply.times(market.priceRise).div(BigInt.fromI32(10).pow(18)))
-		.toBigDecimal()
-		.div(tenPow18)
+	return bigIntToBigDecimal(
+		market.baseCost.plus(updatedSupply.times(market.priceRise).div(BigInt.fromI32(10).pow(18))),
+		TEN_POW_18
+	)
 }

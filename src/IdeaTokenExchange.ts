@@ -10,12 +10,12 @@ import {
 } from '../res/generated/IdeaTokenExchange/IdeaTokenExchange'
 import { IdeaToken, IdeaMarket, IdeaTokenExchange, IdeaTokenVolumePoint } from '../res/generated/schema'
 
-const tenPow18 = BigDecimal.fromString('1000000000000000000')
+let tenPow18 = BigDecimal.fromString('1000000000000000000')
 
 export function handleInvestedState(event: InvestedState): void {
-	const exchange = IdeaTokenExchange.load(event.address.toHex())
-	const market = IdeaMarket.load(event.params.marketID.toHex())
-	const token = IdeaToken.load(event.params.ideaToken.toHex())
+	let exchange = IdeaTokenExchange.load(event.address.toHex())
+	let market = IdeaMarket.load(event.params.marketID.toHex())
+	let token = IdeaToken.load(event.params.ideaToken.toHex())
 
 	if (!exchange) {
 		throw 'IdeaTokenExchange does not exist on InvestedState event'
@@ -33,14 +33,14 @@ export function handleInvestedState(event: InvestedState): void {
 	market.platformFeeInvested = event.params.platformFeeInvested
 	exchange.tradingFeeInvested = event.params.tradingFeeInvested
 
-	const oldVolumePoint = IdeaTokenVolumePoint.load(
+	let oldVolumePoint = IdeaTokenVolumePoint.load(
 		token.id + '-' + event.block.number.toHex() + '-' + event.transaction.index.toHex()
 	)
 	if (oldVolumePoint) {
 		oldVolumePoint.volume = oldVolumePoint.volume.plus(event.params.volume.toBigDecimal().div(tenPow18))
 		oldVolumePoint.save()
 	} else {
-		const newVolumePoint = new IdeaTokenVolumePoint(
+		let newVolumePoint = new IdeaTokenVolumePoint(
 			token.id + '-' + event.block.number.toHex() + '-' + event.transaction.index.toHex()
 		)
 		newVolumePoint.token = token.id
@@ -50,7 +50,7 @@ export function handleInvestedState(event: InvestedState): void {
 		newVolumePoint.volume = event.params.volume.toBigDecimal().div(tenPow18)
 		newVolumePoint.save()
 
-		const dayVolumePoints = token.dayVolumePoints
+		let dayVolumePoints = token.dayVolumePoints
 		dayVolumePoints.push(newVolumePoint.id)
 		token.dayVolumePoints = dayVolumePoints
 	}
@@ -61,7 +61,7 @@ export function handleInvestedState(event: InvestedState): void {
 }
 
 export function handleNewInterestWithdrawer(event: NewInterestWithdrawer): void {
-	const token = IdeaToken.load(event.params.ideaToken.toHex())
+	let token = IdeaToken.load(event.params.ideaToken.toHex())
 	if (!token) {
 		throw 'IdeaToken does not exist on NewInterestWithdrawer event'
 	}
@@ -70,7 +70,7 @@ export function handleNewInterestWithdrawer(event: NewInterestWithdrawer): void 
 }
 
 export function handleNewPlatformFeeWithdrawer(event: NewPlatformFeeWithdrawer): void {
-	const market = IdeaMarket.load(event.params.marketID.toHex())
+	let market = IdeaMarket.load(event.params.marketID.toHex())
 	if (!market) {
 		throw 'Market does not exist on handleNewPlatformFeeWithdrawer event'
 	}
@@ -79,7 +79,7 @@ export function handleNewPlatformFeeWithdrawer(event: NewPlatformFeeWithdrawer):
 }
 
 export function handleDaiRedeemed(event: DaiRedeemed): void {
-	const token = IdeaToken.load(event.params.ideaToken.toHex())
+	let token = IdeaToken.load(event.params.ideaToken.toHex())
 	if (!token) {
 		throw 'IdeaToken does not exist on DaiRedeemed event'
 	}
@@ -88,7 +88,7 @@ export function handleDaiRedeemed(event: DaiRedeemed): void {
 }
 
 export function handlePlatformFeeRedeemed(event: PlatformFeeRedeemed): void {
-	const market = IdeaMarket.load(event.params.marketID.toHex())
+	let market = IdeaMarket.load(event.params.marketID.toHex())
 	if (!market) {
 		throw 'Market does not exist on PlatformFeeRedeemed event'
 	}
@@ -97,7 +97,7 @@ export function handlePlatformFeeRedeemed(event: PlatformFeeRedeemed): void {
 }
 
 export function handleTradingFeeRedeemed(event: TradingFeeRedeemed): void {
-	const exchange = IdeaTokenExchange.load(event.address.toHex())
+	let exchange = IdeaTokenExchange.load(event.address.toHex())
 	if (!exchange) {
 		throw 'IdeaTokenExchange does not exist on TradingFeeRedeemed event'
 	}
