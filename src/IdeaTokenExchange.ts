@@ -1,4 +1,4 @@
-import { BigInt } from '@graphprotocol/graph-ts'
+import { BigInt, BigDecimal } from '@graphprotocol/graph-ts'
 import {
 	NewInterestWithdrawer,
 	NewPlatformFeeWithdrawer,
@@ -56,6 +56,8 @@ export function handleInvestedState(event: InvestedState): void {
 
 		addFutureDayValueChange(token as IdeaToken, event.block.timestamp)
 	}
+
+	updateTokenDayVolume(token as IdeaToken)
 
 	token.save()
 	market.save()
@@ -117,4 +119,14 @@ export function handleOwnershipChanged(event: OwnershipChanged): void {
 	exchange.owner = event.params.newOwner
 	exchange.tradingFeeInvested = BigInt.fromI32(0)
 	exchange.save()
+}
+
+export function updateTokenDayVolume(token: IdeaToken): void {
+	let dayVolumePoints = token.dayVolumePoints
+	let dayVolume = BigDecimal.fromString('0')
+	for (let c = 0; c < dayVolumePoints.length; c++) {
+		let volumePoint = IdeaTokenVolumePoint.load(dayVolumePoints[c])
+		dayVolume = dayVolume.plus(volumePoint.volume)
+	}
+	token.dayVolume = dayVolume
 }

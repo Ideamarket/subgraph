@@ -16,6 +16,8 @@ import {
 } from '../res/generated/schema'
 
 import { updateLockedPercentage } from './IdeaTokenVault'
+import { updateTokenDayPriceChange } from './IdeaToken'
+import { updateTokenDayVolume } from './IdeaTokenExchange'
 import {
 	TEN_POW_18,
 	ZERO_ADDRESS,
@@ -82,26 +84,9 @@ function checkDayValues(block: ethereum.Block): void {
 			}
 		}
 
-		let updatePricePoints = false
 		if (dropPricePointsUntilIndex !== 0) {
-			token.dayPricePoints = dayPricePoints.slice(dropPricePointsUntilIndex + 1, token.dayPricePoints.length)
-			updatePricePoints = true
-		} else if (dayPricePoints.length > 0) {
-			let latest = IdeaTokenPricePoint.load(token.latestPricePoint)
-			if (latest.timestamp.equals(currentTS)) {
-				updatePricePoints = true
-			}
-		}
-
-		if (updatePricePoints) {
-			dayPricePoints = token.dayPricePoints
-			if (dayPricePoints.length === 0) {
-				token.dayChange = BigDecimal.fromString('0')
-			} else {
-				let startPricePoint = IdeaTokenPricePoint.load(dayPricePoints[0])
-				let endPricePoint = IdeaTokenPricePoint.load(dayPricePoints[dayPricePoints.length - 1])
-				token.dayChange = endPricePoint.price.div(startPricePoint.oldPrice).minus(BigDecimal.fromString('1'))
-			}
+			token.dayPricePoints = dayPricePoints.slice(dropPricePointsUntilIndex)
+			updateTokenDayPriceChange(token as IdeaToken)
 		}
 
 		// ---- Volume Points
@@ -118,25 +103,9 @@ function checkDayValues(block: ethereum.Block): void {
 			}
 		}
 
-		let updateVolumePoints = false
 		if (dropVolumePointsUntilIndex !== 0) {
-			token.dayVolumePoints = dayVolumePoints.slice(dropVolumePointsUntilIndex + 1, token.dayVolumePoints.length)
-			updateVolumePoints = true
-		} else if (dayVolumePoints.length > 0) {
-			let latest = IdeaTokenVolumePoint.load(dayVolumePoints[dayVolumePoints.length - 1])
-			if (latest.timestamp.equals(currentTS)) {
-				updateVolumePoints = true
-			}
-		}
-
-		if (updateVolumePoints) {
-			dayVolumePoints = token.dayVolumePoints
-			let dayVolume = BigDecimal.fromString('0')
-			for (let c = 0; c < dayVolumePoints.length; c++) {
-				let volumePoint = IdeaTokenVolumePoint.load(dayVolumePoints[c])
-				dayVolume = dayVolume.plus(volumePoint.volume)
-			}
-			token.dayVolume = dayVolume
+			token.dayVolumePoints = dayVolumePoints.slice(dropVolumePointsUntilIndex)
+			updateTokenDayVolume(token as IdeaToken)
 		}
 
 		token.save()

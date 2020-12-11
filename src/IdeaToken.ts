@@ -27,6 +27,7 @@ export function handleTransfer(event: Transfer): void {
 		token.supply = token.supply.plus(event.params.value)
 		updateLockedPercentage(token as IdeaToken)
 		addPricePoint(token as IdeaToken, market as IdeaMarket, event as Transfer)
+		updateTokenDayPriceChange(token as IdeaToken)
 	} else {
 		// Transfer not from zero address. Decrease balance
 		let fromBalance = IdeaTokenBalance.load(event.params.from.toHex() + '-' + token.id)
@@ -47,6 +48,7 @@ export function handleTransfer(event: Transfer): void {
 		token.supply = token.supply.minus(event.params.value)
 		updateLockedPercentage(token as IdeaToken)
 		addPricePoint(token as IdeaToken, market as IdeaMarket, event as Transfer)
+		updateTokenDayPriceChange(token as IdeaToken)
 	} else {
 		// Transfer not to zero address. Increase balance
 		let toBalance = IdeaTokenBalance.load(event.params.to.toHex() + '-' + token.id)
@@ -136,4 +138,17 @@ function calculateDecimalPriceFromSupply(currentSupply: BigInt, market: IdeaMark
 		market.baseCost.plus(updatedSupply.times(market.priceRise).div(BigInt.fromI32(10).pow(18))),
 		TEN_POW_18
 	)
+}
+
+export function updateTokenDayPriceChange(token: IdeaToken): void {
+	let dayPricePoints = token.dayPricePoints
+
+	if (dayPricePoints.length == 0) {
+		token.dayChange = BigDecimal.fromString('0')
+		return
+	}
+
+	let startPricePoint = IdeaTokenPricePoint.load(dayPricePoints[0])
+	let endPricePoint = IdeaTokenPricePoint.load(dayPricePoints[dayPricePoints.length - 1])
+	token.dayChange = endPricePoint.price.div(startPricePoint.oldPrice).minus(BigDecimal.fromString('1'))
 }
