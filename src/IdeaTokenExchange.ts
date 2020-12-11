@@ -1,4 +1,4 @@
-import { BigInt, BigDecimal } from '@graphprotocol/graph-ts'
+import { BigInt } from '@graphprotocol/graph-ts'
 import {
 	NewInterestWithdrawer,
 	NewPlatformFeeWithdrawer,
@@ -10,7 +10,7 @@ import {
 } from '../res/generated/IdeaTokenExchange/IdeaTokenExchange'
 import { IdeaToken, IdeaMarket, IdeaTokenExchange, IdeaTokenVolumePoint } from '../res/generated/schema'
 
-let tenPow18 = BigDecimal.fromString('1000000000000000000')
+import { TEN_POW_18, bigIntToBigDecimal, addFutureDayValueChange } from './shared'
 
 export function handleInvestedState(event: InvestedState): void {
 	let exchange = IdeaTokenExchange.load(event.address.toHex())
@@ -37,7 +37,7 @@ export function handleInvestedState(event: InvestedState): void {
 		token.id + '-' + event.block.number.toHex() + '-' + event.transaction.index.toHex()
 	)
 	if (oldVolumePoint) {
-		oldVolumePoint.volume = oldVolumePoint.volume.plus(event.params.volume.toBigDecimal().div(tenPow18))
+		oldVolumePoint.volume = oldVolumePoint.volume.plus(bigIntToBigDecimal(event.params.volume, TEN_POW_18))
 		oldVolumePoint.save()
 	} else {
 		let newVolumePoint = new IdeaTokenVolumePoint(
@@ -47,12 +47,14 @@ export function handleInvestedState(event: InvestedState): void {
 		newVolumePoint.timestamp = event.block.timestamp
 		newVolumePoint.block = event.block.number
 		newVolumePoint.txindex = event.transaction.index
-		newVolumePoint.volume = event.params.volume.toBigDecimal().div(tenPow18)
+		newVolumePoint.volume = bigIntToBigDecimal(event.params.volume, TEN_POW_18)
 		newVolumePoint.save()
 
 		let dayVolumePoints = token.dayVolumePoints
 		dayVolumePoints.push(newVolumePoint.id)
 		token.dayVolumePoints = dayVolumePoints
+
+		addFutureDayValueChange(token as IdeaToken, event.block.timestamp)
 	}
 
 	token.save()

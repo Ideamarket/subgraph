@@ -1,4 +1,4 @@
-import { Address, BigDecimal, BigInt, ethereum } from '@graphprotocol/graph-ts'
+import { BigDecimal, BigInt, ethereum } from '@graphprotocol/graph-ts'
 import {
 	NewMarket,
 	NewToken,
@@ -6,17 +6,24 @@ import {
 	OwnershipChanged,
 } from '../res/generated/IdeaTokenFactory/IdeaTokenFactory'
 import {
+	FutureDayValueChange,
 	IdeaMarket,
 	IdeaToken,
 	IdeaTokenFactory,
 	IdeaTokenPricePoint,
-	IdeaTokenVault,
 	IdeaTokenVolumePoint,
 	LockedIdeaTokenAmount,
 } from '../res/generated/schema'
 
 import { updateLockedPercentage } from './IdeaTokenVault'
-import { TEN_POW_18, ZERO_ADDRESS, bigIntToBigDecimal } from './shared'
+import {
+	TEN_POW_18,
+	ZERO_ADDRESS,
+	SECONDS_PER_DAY,
+	bigIntToBigDecimal,
+	loadBlockHandlerValues,
+	addFutureDayValueChange,
+} from './shared'
 
 /*
 	// https://thegraph.com/docs/assemblyscript-api#api-reference
@@ -33,24 +40,32 @@ import { TEN_POW_18, ZERO_ADDRESS, bigIntToBigDecimal } from './shared'
 */
 
 export function handleBlock(block: ethereum.Block): void {
-	checkDayPriceAndVolumePoints(block)
+	checkDayValues(block)
 	checkLockedTokens(block)
 }
 
-function checkDayPriceAndVolumePoints(block: ethereum.Block): void {
-	let factory = IdeaTokenFactory.load('factory')
-	if (!factory) {
-		return
-	}
-
+function checkDayValues(block: ethereum.Block): void {
+	let blockHandlerValues = loadBlockHandlerValues()
+	let futureDayValueChanges = blockHandlerValues.futureDayValueChanges
 	let currentTS = block.timestamp
-	let minTS = currentTS.minus(BigInt.fromI32(86400))
+	let minTS = currentTS.minus(BigInt.fromI32(SECONDS_PER_DAY))
+	let numDrop = 0
 
-	for (let i = 0; i < factory.allTokens.length; i++) {
-		let allTokens = factory.allTokens
-		let token = IdeaToken.load(allTokens[i])
+	for (let i = 0; i < blockHandlerValues.futureDayValueChanges.length; i++) {
+		let futureDayValueChange = FutureDayValueChange.load(futureDayValueChanges[i])
+		if (!futureDayValueChange) {
+			throw 'Failed to load FutureDayValueChange in checkDayValues'
+		}
+
+		if (currentTS.lt(futureDayValueChange.ts)) {
+			break
+		}
+
+		numDrop++
+
+		let token = IdeaToken.load(futureDayValueChange.token)
 		if (!token) {
-			throw 'Failed to load token in handleBlock'
+			throw 'Failed to load token in checkDayValues'
 		}
 
 		// ---- Price Points
@@ -59,7 +74,7 @@ function checkDayPriceAndVolumePoints(block: ethereum.Block): void {
 		for (; dropPricePointsUntilIndex < dayPricePoints.length; dropPricePointsUntilIndex++) {
 			let pricePoint = IdeaTokenPricePoint.load(dayPricePoints[dropPricePointsUntilIndex])
 			if (!pricePoint) {
-				throw 'Failed to load price point in handleBlock'
+				throw 'Failed to load price point in checkDayValues'
 			}
 
 			if (pricePoint.timestamp.gt(minTS)) {
@@ -95,7 +110,7 @@ function checkDayPriceAndVolumePoints(block: ethereum.Block): void {
 		for (; dropVolumePointsUntilIndex < dayVolumePoints.length; dropVolumePointsUntilIndex++) {
 			let volumePoint = IdeaTokenVolumePoint.load(dayVolumePoints[dropVolumePointsUntilIndex])
 			if (!volumePoint) {
-				throw 'Failed to load volume point in handleBlock'
+				throw 'Failed to load volume point in checkDayValues'
 			}
 
 			if (volumePoint.timestamp.gt(minTS)) {
@@ -124,20 +139,19 @@ function checkDayPriceAndVolumePoints(block: ethereum.Block): void {
 			token.dayVolume = dayVolume
 		}
 
-		if (updatePricePoints || updateVolumePoints) {
-			token.save()
-		}
+		token.save()
+	}
+
+	if (numDrop > 0) {
+		blockHandlerValues.futureDayValueChanges = futureDayValueChanges.slice(numDrop)
+		blockHandlerValues.save()
 	}
 }
 
 function checkLockedTokens(block: ethereum.Block): void {
-	// If the `vault` is not created yet there can be no locked entries
-	let vault = IdeaTokenVault.load('vault')
-	if (!vault) {
-		return
-	}
+	let blockHandlerValues = loadBlockHandlerValues()
 
-	let futureUnlockedAmounts = vault.futureUnlockedAmounts
+	let futureUnlockedAmounts = blockHandlerValues.futureUnlockedAmounts
 	let currentTS = block.timestamp
 
 	// Iterate over `futureUnlockedAmounts`
@@ -171,8 +185,8 @@ function checkLockedTokens(block: ethereum.Block): void {
 
 	// Only save when we had a change, this saves sync time
 	if (hadChange) {
-		vault.futureUnlockedAmounts = futureUnlockedAmounts
-		vault.save()
+		blockHandlerValues.futureUnlockedAmounts = futureUnlockedAmounts
+		blockHandlerValues.save()
 	}
 }
 
@@ -231,14 +245,7 @@ export function handleNewToken(event: NewToken): void {
 	token.dayVolumePoints = []
 	token.save()
 
-	let factory = IdeaTokenFactory.load('factory')
-	if (!factory) {
-		throw 'IdeaTokenFactory does not exist on NewToken event'
-	}
-	let allTokens = factory.allTokens
-	allTokens.push(tokenID)
-	factory.allTokens = allTokens
-	factory.save()
+	addFutureDayValueChange(token as IdeaToken, event.block.timestamp)
 }
 
 export function handleNewNameVerifier(event: NewNameVerifier): void {
@@ -255,7 +262,6 @@ export function handleOwnershipChanged(event: OwnershipChanged): void {
 	let factory = IdeaTokenFactory.load('factory')
 	if (!factory) {
 		factory = new IdeaTokenFactory('factory')
-		factory.allTokens = []
 	}
 
 	factory.owner = event.params.newOwner

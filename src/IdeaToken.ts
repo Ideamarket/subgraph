@@ -1,4 +1,4 @@
-import { Address, BigInt, BigDecimal } from '@graphprotocol/graph-ts'
+import { BigInt, BigDecimal } from '@graphprotocol/graph-ts'
 import { Transfer, Approval, OwnershipChanged } from '../res/generated/IdeaToken/IdeaToken'
 import {
 	IdeaToken,
@@ -10,7 +10,7 @@ import {
 
 import { updateLockedPercentage } from './IdeaTokenVault'
 
-import { ZERO_ADDRESS, TEN_POW_18, bigIntToBigDecimal } from './shared'
+import { ZERO_ADDRESS, TEN_POW_18, bigIntToBigDecimal, addFutureDayValueChange } from './shared'
 
 export function handleTransfer(event: Transfer): void {
 	let token = IdeaToken.load(event.address.toHex())
@@ -120,6 +120,8 @@ function addPricePoint(token: IdeaToken, market: IdeaMarket, event: Transfer): v
 		let dayPricePoints = token.dayPricePoints
 		dayPricePoints.push(newPricePoint.id)
 		token.dayPricePoints = dayPricePoints
+
+		addFutureDayValueChange(token as IdeaToken, event.block.timestamp)
 	}
 }
 

@@ -14,9 +14,13 @@ dataSources:
       apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
-        - Transfer
-        - Approval
-        - OwnershipChanged
+        - IdeaToken
+        - IdeaTokenBalance
+        - IdeaTokenAllowance
+        - IdeaMarket
+        - IdeaTokenPricePoint
+        - FutureDayValueChange
+        - BlockHandlerValues
       abis:
         - name: IdeaToken
           file: ./res/abis/IdeaToken.json
@@ -41,10 +45,14 @@ dataSources:
       apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
-        - NewMarket
-        - NewToken
-        - NewNameVerifier
-        - OwnershipChanged
+        - IdeaMarket
+        - IdeaToken
+        - IdeaTokenFactory
+        - IdeaTokenPricePoint
+        - IdeaTokenVolumePoint
+        - LockedIdeaTokenAmount
+        - FutureDayValueChange
+        - BlockHandlerValues
       abis:
         - name: IdeaTokenFactory
           file: ./res/abis/IdeaTokenFactory.json
@@ -73,14 +81,12 @@ dataSources:
       apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
-        - TokensBought
-        - TokensSold
-        - NewInterestWithdrawer
-        - NewPlatformFeeWithdrawer
-        - DaiInvested
-        - TradingFeeInvested
-        - PlatformFeeInvested
-        - OwnershipChanged
+        - IdeaToken
+        - IdeaMarket
+        - IdeaTokenExchange
+        - IdeaTokenVolumePoint
+        - FutureDayValueChange
+        - BlockHandlerValues
       abis:
         - name: IdeaTokenExchange
           file: ./res/abis/IdeaTokenExchange.json
@@ -113,8 +119,9 @@ dataSources:
       apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
-        - IdeaTokenVault
         - LockedIdeaTokenAmount
+        - FutureDayValueChange
+        - BlockHandlerValues
       abis:
         - name: IdeaTokenVault
           file: ./res/abis/IdeaTokenVault.json

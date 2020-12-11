@@ -1,8 +1,8 @@
 import { Locked } from '../res/generated/IdeaTokenVault/IdeaTokenVault'
-import { IdeaToken, IdeaTokenVault, LockedIdeaTokenAmount } from '../res/generated/schema'
+import { IdeaToken, LockedIdeaTokenAmount } from '../res/generated/schema'
 import { BigDecimal, BigInt } from '@graphprotocol/graph-ts'
 
-import { TEN_POW_18, bigIntToBigDecimal } from './shared'
+import { TEN_POW_18, bigIntToBigDecimal, loadBlockHandlerValues } from './shared'
 
 export function handleLocked(event: Locked): void {
 	// Create a new `LockedIdeaTokenAmount`
@@ -23,18 +23,12 @@ export function handleLocked(event: Locked): void {
 	updateLockedPercentage(token as IdeaToken)
 	token.save()
 
-	// The `vault` entity might not exist yet.
-	let vault = IdeaTokenVault.load('vault')
-	if (!vault) {
-		vault = new IdeaTokenVault('vault')
-		vault.futureUnlockedAmounts = []
-	}
-
 	// Insert the new `LockedIdeaTokenAmount` into the ordered list of `LockedIdeaTokenAmount`s
-	let futureUnlockedAmounts = vault.futureUnlockedAmounts
+	let blockHandlerValues = loadBlockHandlerValues()
+	let futureUnlockedAmounts = blockHandlerValues.futureUnlockedAmounts
 	let insertIndex = getInsertionIndex(futureUnlockedAmounts, locked)
-	vault.futureUnlockedAmounts = insert(futureUnlockedAmounts, insertIndex, locked.id)
-	vault.save()
+	blockHandlerValues.futureUnlockedAmounts = insert(futureUnlockedAmounts, insertIndex, locked.id)
+	blockHandlerValues.save()
 }
 
 export function updateLockedPercentage(token: IdeaToken): void {

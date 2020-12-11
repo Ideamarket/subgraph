@@ -102,7 +102,6 @@ type IdeaTokenFactory @entity {
   "id: factory"
   id: ID!
   owner: Bytes!
-  allTokens: [IdeaToken!]!
 }
 
 "============================================================ EXCHANGE =========================================================" 
@@ -113,13 +112,6 @@ type IdeaTokenExchange @entity {
   tradingFeeInvested: BigInt!
 }
 
-"============================================================== VAULT ===========================================================" 
-type IdeaTokenVault @entity {
-  "id: vault"
-  id: ID!
-  futureUnlockedAmounts: [LockedIdeaTokenAmount!]!
-}
-
 type LockedIdeaTokenAmount @entity {
   "<tx hash>-<log index>"
   id: ID!
@@ -127,4 +119,21 @@ type LockedIdeaTokenAmount @entity {
   owner: Bytes!
   amount: BigInt!
   lockedUntil: BigInt!
+}
+
+"========================================================== BLOCK HANDLER =======================================================" 
+type FutureDayValueChange @entity {
+  "id: <token id>-<ts>"
+  id: ID!
+  token: IdeaToken!
+  ts: BigInt!
+}
+
+type BlockHandlerValues @entity {
+  "id: blockhandler"
+  id: ID!
+  
+  futureUnlockedAmounts: [LockedIdeaTokenAmount!]!
+  
+  futureDayValueChanges: [FutureDayValueChange!]!
 }
