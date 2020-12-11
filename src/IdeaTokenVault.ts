@@ -36,7 +36,7 @@ export function updateLockedPercentage(token: IdeaToken): void {
 	if (token.supply.gt(BigInt.fromI32(0))) {
 		token.lockedPercentage = bigIntToBigDecimal(token.lockedAmount, TEN_POW_18).div(
 			bigIntToBigDecimal(token.supply, TEN_POW_18)
-		)
+		).times(BigDecimal.fromString('100.0'))
 	} else {
 		token.lockedPercentage = BigDecimal.fromString('0.0')
 	}
