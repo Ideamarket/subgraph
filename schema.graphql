@@ -28,7 +28,10 @@ type IdeaMarket @entity {
   platformFeeRate: BigInt!
   platformFeeWithdrawer: Bytes!
   platformFeeInvested: BigInt!
+  allInterestToPlatform: Boolean!
   nameVerifier: Bytes!
+  daiInMarket: BigInt!
+  invested: BigInt!
   tokens: [IdeaToken!]! @derivedFrom(field: "market")
 }
 

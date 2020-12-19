@@ -2,11 +2,12 @@ import { BigInt, BigDecimal } from '@graphprotocol/graph-ts'
 import {
 	NewInterestWithdrawer,
 	NewPlatformFeeWithdrawer,
-	DaiRedeemed,
 	TradingFeeRedeemed,
 	PlatformFeeRedeemed,
 	OwnershipChanged,
 	InvestedState,
+	TokenInterestRedeemed,
+	PlatformInterestRedeemed,
 } from '../res/generated/IdeaTokenExchange/IdeaTokenExchange'
 import { IdeaToken, IdeaMarket, IdeaTokenExchange, IdeaTokenVolumePoint } from '../res/generated/schema'
 
@@ -27,9 +28,21 @@ export function handleInvestedState(event: InvestedState): void {
 		throw 'IdeaToken does not exist on InvestedState event'
 	}
 
-	token.daiInToken = event.params.daiInToken
-	token.marketCap = event.params.daiInToken
-	token.invested = event.params.daiInvested
+	if (market.allInterestToPlatform) {
+		if (market.daiInMarket.lt(event.params.dai)) {
+			token.marketCap = token.marketCap.plus(event.params.dai.minus(market.daiInMarket))
+		} else {
+			token.marketCap = token.marketCap.minus(market.daiInMarket.minus(event.params.dai))
+		}
+
+		market.daiInMarket = event.params.dai
+		market.invested = event.params.daiInvested
+	} else {
+		token.daiInToken = event.params.dai
+		token.marketCap = event.params.dai
+		token.invested = event.params.daiInvested
+	}
+
 	market.platformFeeInvested = event.params.platformFeeInvested
 	exchange.tradingFeeInvested = event.params.tradingFeeInvested
 
@@ -82,13 +95,22 @@ export function handleNewPlatformFeeWithdrawer(event: NewPlatformFeeWithdrawer):
 	market.save()
 }
 
-export function handleDaiRedeemed(event: DaiRedeemed): void {
+export function handleTokenInterestRedeemed(event: TokenInterestRedeemed): void {
 	let token = IdeaToken.load(event.params.ideaToken.toHex())
 	if (!token) {
-		throw 'IdeaToken does not exist on DaiRedeemed event'
+		throw 'IdeaToken does not exist on TokenInterestRedeemed event'
 	}
 	token.invested = event.params.investmentToken
 	token.save()
+}
+
+export function handlePlatformInterestRedeemed(event: PlatformInterestRedeemed): void {
+	let market = IdeaMarket.load(event.params.marketID.toHex())
+	if (!market) {
+		throw 'IdeaMarket does not exist on PlatformInterestRedeemed event'
+	}
+	market.invested = event.params.investmentToken
+	market.save()
 }
 
 export function handlePlatformFeeRedeemed(event: PlatformFeeRedeemed): void {

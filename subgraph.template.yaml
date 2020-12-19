@@ -59,7 +59,7 @@ dataSources:
       blockHandlers:
         - handler: handleBlock
       eventHandlers:
-        - event: NewMarket(uint256,string,uint256,uint256,uint256,uint256,uint256,address)
+        - event: NewMarket(uint256,string,uint256,uint256,uint256,uint256,uint256,bool,address)
           handler: handleNewMarket
         - event: NewToken(uint256,uint256,string,address)
           handler: handleNewToken
@@ -97,8 +97,10 @@ dataSources:
           handler: handleNewPlatformFeeWithdrawer
         - event: InvestedState(uint256,address,uint256,uint256,uint256,uint256,uint256)
           handler: handleInvestedState
-        - event: DaiRedeemed(address,uint256)
-          handler: handleDaiRedeemed
+        - event: TokenInterestRedeemed(address,uint256)
+          handler: handleTokenInterestRedeemed
+        - event: PlatformInterestRedeemed(uint256,uint256)
+          handler: handlePlatformInterestRedeemed
         - event: TradingFeeRedeemed()
           handler: handleTradingFeeRedeemed
         - event: PlatformFeeRedeemed(uint256)
