@@ -97,13 +97,13 @@ dataSources:
           handler: handleNewPlatformFeeWithdrawer
         - event: InvestedState(uint256,address,uint256,uint256,uint256,uint256,uint256)
           handler: handleInvestedState
-        - event: TokenInterestRedeemed(address,uint256)
+        - event: TokenInterestRedeemed(address,uint256,uint256)
           handler: handleTokenInterestRedeemed
-        - event: PlatformInterestRedeemed(uint256,uint256)
+        - event: PlatformInterestRedeemed(uint256,uint256,uint256)
           handler: handlePlatformInterestRedeemed
-        - event: TradingFeeRedeemed()
+        - event: TradingFeeRedeemed(uint256)
           handler: handleTradingFeeRedeemed
-        - event: PlatformFeeRedeemed(uint256)
+        - event: PlatformFeeRedeemed(uint256,uint256)
           handler: handlePlatformFeeRedeemed
         - event: OwnershipChanged(address,address)
           handler: handleOwnershipChanged

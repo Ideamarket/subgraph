@@ -32,6 +32,8 @@ type IdeaMarket @entity {
   nameVerifier: Bytes!
   daiInMarket: BigInt!
   invested: BigInt!
+  platformInterestRedeemed: BigInt!
+  platformFeeRedeemed: BigInt!
   tokens: [IdeaToken!]! @derivedFrom(field: "market")
 }
 
@@ -87,6 +89,7 @@ type IdeaToken @entity {
   interestWithdrawer: Bytes!
   daiInToken: BigInt!
   invested: BigInt!
+  tokenInterestRedeemed: BigInt!
   dayChange: BigDecimal!
   dayVolume: BigDecimal!
   listedAt: BigInt! 

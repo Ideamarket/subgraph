@@ -175,6 +175,8 @@ export function handleNewMarket(event: NewMarket): void {
 	market.nameVerifier = event.params.nameVerifier
 	market.daiInMarket = BigInt.fromI32(0)
 	market.invested = BigInt.fromI32(0)
+	market.platformFeeRedeemed = BigInt.fromI32(0)
+	market.platformInterestRedeemed = BigInt.fromI32(0)
 	market.save()
 }
 
@@ -207,6 +209,7 @@ export function handleNewToken(event: NewToken): void {
 	token.interestWithdrawer = ZERO_ADDRESS
 	token.daiInToken = BigInt.fromI32(0)
 	token.invested = BigInt.fromI32(0)
+	token.tokenInterestRedeemed = BigInt.fromI32(0)
 	token.dayChange = BigDecimal.fromString('0')
 	token.dayVolume = BigDecimal.fromString('0')
 	token.listedAt = event.block.timestamp

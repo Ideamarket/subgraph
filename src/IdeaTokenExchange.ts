@@ -101,6 +101,7 @@ export function handleTokenInterestRedeemed(event: TokenInterestRedeemed): void 
 		throw 'IdeaToken does not exist on TokenInterestRedeemed event'
 	}
 	token.invested = event.params.investmentToken
+	token.tokenInterestRedeemed = event.params.daiRedeemed
 	token.save()
 }
 
@@ -110,6 +111,7 @@ export function handlePlatformInterestRedeemed(event: PlatformInterestRedeemed):
 		throw 'IdeaMarket does not exist on PlatformInterestRedeemed event'
 	}
 	market.invested = event.params.investmentToken
+	market.platformInterestRedeemed = event.params.daiRedeemed
 	market.save()
 }
 
@@ -119,6 +121,7 @@ export function handlePlatformFeeRedeemed(event: PlatformFeeRedeemed): void {
 		throw 'Market does not exist on PlatformFeeRedeemed event'
 	}
 	market.platformFeeInvested = BigInt.fromI32(0)
+	market.platformFeeRedeemed = event.params.daiRedeemed
 	market.save()
 }
 
