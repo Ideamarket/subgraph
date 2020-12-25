@@ -61,7 +61,7 @@ dataSources:
       eventHandlers:
         - event: NewMarket(uint256,string,uint256,uint256,uint256,uint256,uint256,bool,address)
           handler: handleNewMarket
-        - event: NewToken(uint256,uint256,string,address)
+        - event: NewToken(uint256,uint256,string,address,address)
           handler: handleNewToken
         - event: NewNameVerifier(uint256,address)
           handler: handleNewNameVerifier

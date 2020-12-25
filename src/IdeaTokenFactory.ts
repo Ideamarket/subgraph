@@ -215,6 +215,7 @@ export function handleNewToken(event: NewToken): void {
 	token.listedAt = event.block.timestamp
 	token.lockedAmount = BigInt.fromI32(0)
 	token.lockedPercentage = BigDecimal.fromString('0.0')
+	token.lister = event.params.lister
 	token.latestPricePoint = pricePointID
 	token.dayPricePoints = [pricePointID]
 	token.dayVolumePoints = []
