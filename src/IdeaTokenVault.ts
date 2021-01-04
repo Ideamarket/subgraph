@@ -5,7 +5,7 @@ import { BigDecimal, BigInt } from '@graphprotocol/graph-ts'
 import { TEN_POW_18, bigIntToBigDecimal, loadBlockHandlerValues } from './shared'
 
 export function handleLocked(event: Locked): void {
-	// Create a new `LockedIdeaTokenAmount`
+	// Create a new LockedIdeaTokenAmount
 	let locked = new LockedIdeaTokenAmount(event.transaction.hash.toHex() + '-' + event.logIndex.toHex())
 	locked.token = event.params.ideaToken.toHex()
 	locked.owner = event.params.owner
@@ -23,7 +23,7 @@ export function handleLocked(event: Locked): void {
 	updateLockedPercentage(token as IdeaToken)
 	token.save()
 
-	// Insert the new `LockedIdeaTokenAmount` into the ordered list of `LockedIdeaTokenAmount`s
+	// Insert the new LockedIdeaTokenAmount into the ordered list of LockedIdeaTokenAmounts
 	let blockHandlerValues = loadBlockHandlerValues()
 	let futureUnlockedAmounts = blockHandlerValues.futureUnlockedAmounts
 	let insertIndex = getInsertionIndex(futureUnlockedAmounts, locked)

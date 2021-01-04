@@ -11,7 +11,7 @@ import {
 } from '../res/generated/IdeaTokenExchange/IdeaTokenExchange'
 import { IdeaToken, IdeaMarket, IdeaTokenExchange, IdeaTokenVolumePoint } from '../res/generated/schema'
 
-import { TEN_POW_18, bigIntToBigDecimal, addFutureDayValueChange } from './shared'
+import { TEN_POW_18, ZERO, bigIntToBigDecimal, addFutureDayValueChange, appendToArray } from './shared'
 
 export function handleInvestedState(event: InvestedState): void {
 	let exchange = IdeaTokenExchange.load(event.address.toHex())
@@ -30,8 +30,10 @@ export function handleInvestedState(event: InvestedState): void {
 
 	if (market.allInterestToPlatform) {
 		if (market.daiInMarket.lt(event.params.dai)) {
+			// Event was a buy
 			token.marketCap = token.marketCap.plus(event.params.dai.minus(market.daiInMarket))
 		} else {
+			// Event was a sell
 			token.marketCap = token.marketCap.minus(market.daiInMarket.minus(event.params.dai))
 		}
 
@@ -50,6 +52,8 @@ export function handleInvestedState(event: InvestedState): void {
 		token.id + '-' + event.block.number.toHex() + '-' + event.transaction.index.toHex()
 	)
 	if (oldVolumePoint) {
+		// Same tx did multiple trades
+		// Reuse existing volume point
 		oldVolumePoint.volume = oldVolumePoint.volume.plus(bigIntToBigDecimal(event.params.volume, TEN_POW_18))
 		oldVolumePoint.save()
 	} else {
@@ -63,10 +67,7 @@ export function handleInvestedState(event: InvestedState): void {
 		newVolumePoint.volume = bigIntToBigDecimal(event.params.volume, TEN_POW_18)
 		newVolumePoint.save()
 
-		let dayVolumePoints = token.dayVolumePoints
-		dayVolumePoints.push(newVolumePoint.id)
-		token.dayVolumePoints = dayVolumePoints
-
+		token.dayVolumePoints = appendToArray(token.dayVolumePoints, newVolumePoint.id)
 		addFutureDayValueChange(token as IdeaToken, event.block.timestamp)
 	}
 
@@ -120,7 +121,7 @@ export function handlePlatformFeeRedeemed(event: PlatformFeeRedeemed): void {
 	if (!market) {
 		throw 'Market does not exist on PlatformFeeRedeemed event'
 	}
-	market.platformFeeInvested = BigInt.fromI32(0)
+	market.platformFeeInvested = ZERO
 	market.platformFeeRedeemed = event.params.daiRedeemed
 	market.save()
 }
@@ -131,18 +132,19 @@ export function handleTradingFeeRedeemed(event: TradingFeeRedeemed): void {
 		throw 'IdeaTokenExchange does not exist on TradingFeeRedeemed event'
 	}
 
-	exchange.tradingFeeInvested = BigInt.fromI32(0)
+	exchange.tradingFeeInvested = ZERO
 	exchange.save()
 }
 
 export function handleOwnershipChanged(event: OwnershipChanged): void {
 	let exchange = IdeaTokenExchange.load(event.address.toHex())
+	// This event is emitted by the ctor
 	if (!exchange) {
 		exchange = new IdeaTokenExchange(event.address.toHex())
 	}
 
 	exchange.owner = event.params.newOwner
-	exchange.tradingFeeInvested = BigInt.fromI32(0)
+	exchange.tradingFeeInvested = ZERO
 	exchange.save()
 }
 

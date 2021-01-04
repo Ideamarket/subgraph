@@ -2,6 +2,7 @@ import { Address, BigDecimal, BigInt } from '@graphprotocol/graph-ts'
 import { BlockHandlerValues, FutureDayValueChange, IdeaToken } from '../res/generated/schema'
 
 export let ZERO_ADDRESS = Address.fromString('0x0000000000000000000000000000000000000000')
+export let ZERO = BigInt.fromI32(0)
 export let TEN_POW_18 = BigDecimal.fromString('1000000000000000000')
 export let SECONDS_PER_DAY = 86400
 
@@ -36,4 +37,30 @@ export function addFutureDayValueChange(token: IdeaToken, currentTs: BigInt): vo
 		values.futureDayValueChanges = currentArray
 		values.save()
 	}
+}
+
+/*
+	// https://thegraph.com/docs/assemblyscript-api#api-reference
+
+	// This won't work
+	entity.numbers.push(BigInt.fromI32(1))
+	entity.save()
+
+	// This will work
+	let numbers = entity.numbers
+	numbers.push(BigInt.fromI32(1))
+	entity.numbers = numbers
+	entity.save()
+*/
+export function appendToArray(array: string[], append: string): string[] {
+	array.push(append)
+	return array
+}
+
+export function first(array: string[]): string {
+	return array[0]
+}
+
+export function last(array: string[]): string {
+	return array[array.length - 1]
 }
