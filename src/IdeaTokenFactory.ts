@@ -4,6 +4,8 @@ import {
 	NewToken,
 	NewNameVerifier,
 	OwnershipChanged,
+	NewPlatformFee,
+	NewTradingFee
 } from '../res/generated/IdeaTokenFactory/IdeaTokenFactory'
 import {
 	FutureDayValueChange,
@@ -21,6 +23,7 @@ import { updateTokenDayVolume } from './IdeaTokenExchange'
 import {
 	TEN_POW_18,
 	ZERO_ADDRESS,
+	ZERO,
 	SECONDS_PER_DAY,
 	bigIntToBigDecimal,
 	loadBlockHandlerValues,
@@ -170,13 +173,13 @@ export function handleNewMarket(event: NewMarket): void {
 	market.tradingFeeRate = event.params.tradingFeeRate
 	market.platformFeeRate = event.params.platformFeeRate
 	market.platformFeeWithdrawer = ZERO_ADDRESS
-	market.platformFeeInvested = BigInt.fromI32(0)
+	market.platformFeeInvested = ZERO
 	market.allInterestToPlatform = event.params.allInterestToPlatform
 	market.nameVerifier = event.params.nameVerifier
-	market.daiInMarket = BigInt.fromI32(0)
-	market.invested = BigInt.fromI32(0)
-	market.platformFeeRedeemed = BigInt.fromI32(0)
-	market.platformInterestRedeemed = BigInt.fromI32(0)
+	market.daiInMarket = ZERO
+	market.invested = ZERO
+	market.platformFeeRedeemed = ZERO
+	market.platformInterestRedeemed = ZERO
 	market.save()
 }
 
@@ -202,18 +205,18 @@ export function handleNewToken(event: NewToken): void {
 	token.tokenID = event.params.id.toI32()
 	token.market = market.id
 	token.name = event.params.name
-	token.supply = BigInt.fromI32(0)
+	token.supply = ZERO
 	token.holders = 0
-	token.marketCap = BigInt.fromI32(0)
+	token.marketCap = ZERO
 	token.owner = ZERO_ADDRESS
 	token.interestWithdrawer = ZERO_ADDRESS
-	token.daiInToken = BigInt.fromI32(0)
-	token.invested = BigInt.fromI32(0)
-	token.tokenInterestRedeemed = BigInt.fromI32(0)
+	token.daiInToken = ZERO
+	token.invested = ZERO
+	token.tokenInterestRedeemed = ZERO
 	token.dayChange = BigDecimal.fromString('0')
 	token.dayVolume = BigDecimal.fromString('0')
 	token.listedAt = event.block.timestamp
-	token.lockedAmount = BigInt.fromI32(0)
+	token.lockedAmount = ZERO
 	token.lockedPercentage = BigDecimal.fromString('0.0')
 	token.lister = event.params.lister
 	token.latestPricePoint = pricePointID
@@ -242,4 +245,24 @@ export function handleOwnershipChanged(event: OwnershipChanged): void {
 
 	factory.owner = event.params.newOwner
 	factory.save()
+}
+
+export function handleNewTradingFee(event: NewTradingFee): void {
+	let market = IdeaMarket.load(event.params.marketID.toHex())
+	if (!market) {
+		throw 'IdeaMarket does not exist on NewTradingFee event'
+	}
+
+	market.tradingFeeRate = event.params.tradingFeeRate
+	market.save()
+}
+
+export function handleNewPlatformFee(event: NewPlatformFee): void {
+	let market = IdeaMarket.load(event.params.marketID.toHex())
+	if (!market) {
+		throw 'IdeaMarket does not exist on NewPlatformFee event'
+	}
+
+	market.platformFeeRate = event.params.platformFeeRate
+	market.save()
 }

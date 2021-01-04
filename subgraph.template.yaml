@@ -67,6 +67,10 @@ dataSources:
           handler: handleNewNameVerifier
         - event: OwnershipChanged(address,address)
           handler: handleOwnershipChanged
+        - event: NewTradingFee(uint256,uint256)
+          handler: handleNewTradingFee
+        - event: NewPlatformFee(uint256,uint256)
+          handler: handleNewPlatformFee
       file: ./src/IdeaTokenFactory.ts
   # ============================== IdeaTokenExchange ==============================
   - kind: ethereum/contract
