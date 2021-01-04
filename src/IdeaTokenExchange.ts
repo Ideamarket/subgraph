@@ -48,9 +48,7 @@ export function handleInvestedState(event: InvestedState): void {
 	market.platformFeeInvested = event.params.platformFeeInvested
 	exchange.tradingFeeInvested = event.params.tradingFeeInvested
 
-	let newVolumePoint = new IdeaTokenVolumePoint(
-		event.transaction.hash.toHex() + '-' + event.logIndex.toHex()
-	)
+	let newVolumePoint = new IdeaTokenVolumePoint(event.transaction.hash.toHex() + '-' + event.logIndex.toHex())
 	newVolumePoint.token = token.id
 	newVolumePoint.timestamp = event.block.timestamp
 	newVolumePoint.volume = bigIntToBigDecimal(event.params.volume, TEN_POW_18)

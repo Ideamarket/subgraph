@@ -130,9 +130,7 @@ export function handleOwnershipChanged(event: OwnershipChanged): void {
 function addPricePoint(token: IdeaToken, market: IdeaMarket, event: Transfer): void {
 	let oldPricePoint = IdeaTokenPricePoint.load(token.latestPricePoint)
 
-	let newPricePoint = new IdeaTokenPricePoint(
-		event.transaction.hash.toHex() + '-' + event.logIndex.toHex()
-	)
+	let newPricePoint = new IdeaTokenPricePoint(event.transaction.hash.toHex() + '-' + event.logIndex.toHex())
 	newPricePoint.token = token.id
 	newPricePoint.timestamp = event.block.timestamp
 	newPricePoint.oldPrice = oldPricePoint.price
