@@ -40,23 +40,19 @@ type IdeaMarket @entity {
 "============================================================ TOKEN ============================================================" 
 
 type IdeaTokenPricePoint @entity {
-  "<token address>-<block>-<txindex>"
+  "<tx>-<logindex>"
   id: ID!
   token: IdeaToken!
   timestamp: BigInt!
-  block: BigInt!
-  txindex: BigInt!
   oldPrice: BigDecimal!
   price: BigDecimal!
 }
 
 type IdeaTokenVolumePoint @entity {
-  "<token address>-<block>-<txindex>"
+  "<tx>-<logindex>"
   id: ID!
   token: IdeaToken!
   timestamp: BigInt!
-  block: BigInt!
-  txindex: BigInt!
   volume: BigDecimal!
 }
 

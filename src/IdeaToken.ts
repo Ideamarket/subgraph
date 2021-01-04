@@ -130,28 +130,19 @@ export function handleOwnershipChanged(event: OwnershipChanged): void {
 function addPricePoint(token: IdeaToken, market: IdeaMarket, event: Transfer): void {
 	let oldPricePoint = IdeaTokenPricePoint.load(token.latestPricePoint)
 
-	if (oldPricePoint.block === event.block.number && oldPricePoint.txindex === event.transaction.index) {
-		// The same tx did multiple trades
-		// Update the existing price point with new price
-		oldPricePoint.price = calculateDecimalPriceFromSupply(token.supply, market)
-		oldPricePoint.save()
-	} else {
-		let newPricePoint = new IdeaTokenPricePoint(
-			token.id + '-' + event.block.number.toHex() + '-' + event.transaction.index.toHex()
-		)
-		newPricePoint.token = token.id
-		newPricePoint.timestamp = event.block.timestamp
-		newPricePoint.block = event.block.number
-		newPricePoint.txindex = event.transaction.index
-		newPricePoint.oldPrice = oldPricePoint.price
-		newPricePoint.price = calculateDecimalPriceFromSupply(token.supply, market)
-		newPricePoint.save()
+	let newPricePoint = new IdeaTokenPricePoint(
+		event.transaction.hash.toHex() + '-' + event.logIndex.toHex()
+	)
+	newPricePoint.token = token.id
+	newPricePoint.timestamp = event.block.timestamp
+	newPricePoint.oldPrice = oldPricePoint.price
+	newPricePoint.price = calculateDecimalPriceFromSupply(token.supply, market)
+	newPricePoint.save()
 
-		token.latestPricePoint = newPricePoint.id
-		token.dayPricePoints = appendToArray(token.dayPricePoints, newPricePoint.id)
+	token.latestPricePoint = newPricePoint.id
+	token.dayPricePoints = appendToArray(token.dayPricePoints, newPricePoint.id)
 
-		addFutureDayValueChange(token as IdeaToken, event.block.timestamp)
-	}
+	addFutureDayValueChange(token as IdeaToken, event.block.timestamp)
 }
 
 function calculateDecimalPriceFromSupply(currentSupply: BigInt, market: IdeaMarket): BigDecimal {

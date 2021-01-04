@@ -45,12 +45,10 @@ export function handleNewToken(event: NewToken): void {
 
 	let tokenID = event.params.addr.toHex()
 
-	let pricePointID = tokenID + '-' + event.block.number.toHex() + '-' + event.transaction.index.toHex()
+	let pricePointID = event.transaction.hash.toHex() + '-' + event.logIndex.toHex()
 	let pricePoint = new IdeaTokenPricePoint(pricePointID)
 	pricePoint.token = tokenID
 	pricePoint.timestamp = event.block.timestamp
-	pricePoint.block = event.block.number
-	pricePoint.txindex = event.transaction.index
 	pricePoint.oldPrice = bigIntToBigDecimal(market.baseCost, TEN_POW_18)
 	pricePoint.price = bigIntToBigDecimal(market.baseCost, TEN_POW_18)
 	pricePoint.save()

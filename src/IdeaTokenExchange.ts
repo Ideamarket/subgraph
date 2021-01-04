@@ -48,28 +48,16 @@ export function handleInvestedState(event: InvestedState): void {
 	market.platformFeeInvested = event.params.platformFeeInvested
 	exchange.tradingFeeInvested = event.params.tradingFeeInvested
 
-	let oldVolumePoint = IdeaTokenVolumePoint.load(
-		token.id + '-' + event.block.number.toHex() + '-' + event.transaction.index.toHex()
+	let newVolumePoint = new IdeaTokenVolumePoint(
+		event.transaction.hash.toHex() + '-' + event.logIndex.toHex()
 	)
-	if (oldVolumePoint) {
-		// Same tx did multiple trades
-		// Reuse existing volume point
-		oldVolumePoint.volume = oldVolumePoint.volume.plus(bigIntToBigDecimal(event.params.volume, TEN_POW_18))
-		oldVolumePoint.save()
-	} else {
-		let newVolumePoint = new IdeaTokenVolumePoint(
-			token.id + '-' + event.block.number.toHex() + '-' + event.transaction.index.toHex()
-		)
-		newVolumePoint.token = token.id
-		newVolumePoint.timestamp = event.block.timestamp
-		newVolumePoint.block = event.block.number
-		newVolumePoint.txindex = event.transaction.index
-		newVolumePoint.volume = bigIntToBigDecimal(event.params.volume, TEN_POW_18)
-		newVolumePoint.save()
+	newVolumePoint.token = token.id
+	newVolumePoint.timestamp = event.block.timestamp
+	newVolumePoint.volume = bigIntToBigDecimal(event.params.volume, TEN_POW_18)
+	newVolumePoint.save()
 
-		token.dayVolumePoints = appendToArray(token.dayVolumePoints, newVolumePoint.id)
-		addFutureDayValueChange(token as IdeaToken, event.block.timestamp)
-	}
+	token.dayVolumePoints = appendToArray(token.dayVolumePoints, newVolumePoint.id)
+	addFutureDayValueChange(token as IdeaToken, event.block.timestamp)
 
 	updateTokenDayVolume(token as IdeaToken)
 
