@@ -10,7 +10,7 @@ import {
 import { updateLockedPercentage } from './IdeaTokenVault'
 import { updateTokenDayPriceChange } from './IdeaToken'
 import { updateTokenDayVolume } from './IdeaTokenExchange'
-import { SECONDS_PER_DAY, loadBlockHandlerValues } from './shared'
+import { SECONDS_PER_DAY, loadBlockHandlerValues, first } from './shared'
 
 export function blockHandler(block: ethereum.Block): void {
 	checkDayValues(block)
@@ -25,7 +25,7 @@ function checkDayValues(block: ethereum.Block): void {
 	let numDrop = 0
 
 	for (let i = 0; i < blockHandlerValues.futureDayValueChanges.length; i++) {
-		let futureDayValueChange = FutureDayValueChange.load(futureDayValueChanges[i])
+		let futureDayValueChange = FutureDayValueChange.load(first(futureDayValueChanges))
 		if (!futureDayValueChange) {
 			throw 'Failed to load FutureDayValueChange in checkDayValues'
 		}
@@ -97,7 +97,7 @@ function checkLockedTokens(block: ethereum.Block): void {
 	// Iterate over `futureUnlockedAmounts`
 	let hadChange = false
 	while (futureUnlockedAmounts.length > 0) {
-		let futureUnlockedAmount = LockedIdeaTokenAmount.load(futureUnlockedAmounts[0])
+		let futureUnlockedAmount = LockedIdeaTokenAmount.load(first(futureUnlockedAmounts))
 		if (!futureUnlockedAmount) {
 			throw 'LockedIdeaTokenAmount not found'
 		}
