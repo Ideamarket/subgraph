@@ -29,8 +29,6 @@ dataSources:
           handler: handleTransfer
         - event: Approval(indexed address,indexed address,uint256)
           handler: handleApproval
-        - event: OwnershipChanged(address,address)
-          handler: handleOwnershipChanged
       file: ./src/IdeaToken.ts
   # ============================== IdeaTokenFactory ==============================
   - kind: ethereum/contract
