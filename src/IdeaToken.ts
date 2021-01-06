@@ -112,21 +112,6 @@ export function handleApproval(event: Approval): void {
 	allowance.save()
 }
 
-export function handleOwnershipChanged(event: OwnershipChanged): void {
-	let token = IdeaToken.load(event.address.toHex())
-	// This event triggers on every OwnershipChanged event, also from ERC20s
-	// which are not part of Ideamarket
-	//
-	// If the token does not exist, it means this event is from an external
-	// ERC20 and we can ignore it
-	if (!token) {
-		return
-	}
-
-	token.owner = event.params.newOwner
-	token.save()
-}
-
 function addPricePoint(token: IdeaToken, market: IdeaMarket, event: Transfer): void {
 	let oldPricePoint = IdeaTokenPricePoint.load(token.latestPricePoint)
 

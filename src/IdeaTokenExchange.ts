@@ -1,7 +1,7 @@
-import { BigInt, BigDecimal } from '@graphprotocol/graph-ts'
+import { BigDecimal } from '@graphprotocol/graph-ts'
 import {
-	NewInterestWithdrawer,
-	NewPlatformFeeWithdrawer,
+	NewTokenOwner,
+	NewPlatformOwner,
 	TradingFeeRedeemed,
 	PlatformFeeRedeemed,
 	OwnershipChanged,
@@ -64,21 +64,21 @@ export function handleInvestedState(event: InvestedState): void {
 	exchange.save()
 }
 
-export function handleNewInterestWithdrawer(event: NewInterestWithdrawer): void {
+export function handleNewTokenOwner(event: NewTokenOwner): void {
 	let token = IdeaToken.load(event.params.ideaToken.toHex())
 	if (!token) {
-		throw 'IdeaToken does not exist on NewInterestWithdrawer event'
+		throw 'IdeaToken does not exist on NewTokenOwner event'
 	}
-	token.interestWithdrawer = event.params.withdrawer
+	token.tokenOwner = event.params.owner
 	token.save()
 }
 
-export function handleNewPlatformFeeWithdrawer(event: NewPlatformFeeWithdrawer): void {
+export function handleNewPlatformOwner(event: NewPlatformOwner): void {
 	let market = IdeaMarket.load(event.params.marketID.toHex())
 	if (!market) {
-		throw 'Market does not exist on handleNewPlatformFeeWithdrawer event'
+		throw 'Market does not exist on NewPlatformOwner event'
 	}
-	market.platformFeeWithdrawer = event.params.withdrawer
+	market.platformOwner = event.params.owner
 	market.save()
 }
 

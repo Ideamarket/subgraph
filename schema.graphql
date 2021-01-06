@@ -26,7 +26,7 @@ type IdeaMarket @entity {
   hatchTokens: BigInt!
   tradingFeeRate: BigInt!
   platformFeeRate: BigInt!
-  platformFeeWithdrawer: Bytes!
+  platformOwner: Bytes!
   platformFeeInvested: BigInt!
   allInterestToPlatform: Boolean!
   nameVerifier: Bytes!
@@ -81,8 +81,7 @@ type IdeaToken @entity {
   supply: BigInt!
   holders: Int!
   marketCap: BigInt!
-  owner: Bytes!
-  interestWithdrawer: Bytes!
+  tokenOwner: Bytes!
   daiInToken: BigInt!
   invested: BigInt!
   tokenInterestRedeemed: BigInt!

@@ -95,10 +95,10 @@ dataSources:
         - name: IdeaTokenExchange
           file: ./res/abis/IdeaTokenExchange.json
       eventHandlers:
-        - event: NewInterestWithdrawer(address,address)
-          handler: handleNewInterestWithdrawer
-        - event: NewPlatformFeeWithdrawer(uint256,address)
-          handler: handleNewPlatformFeeWithdrawer
+        - event: NewTokenOwner(address,address)
+          handler: handleNewTokenOwner
+        - event: NewPlatformOwner(uint256,address)
+          handler: handleNewPlatformOwner
         - event: InvestedState(uint256,address,uint256,uint256,uint256,uint256,uint256)
           handler: handleInvestedState
         - event: TokenInterestRedeemed(address,uint256,uint256)

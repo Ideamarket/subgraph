@@ -26,7 +26,7 @@ export function handleNewMarket(event: NewMarket): void {
 	market.hatchTokens = event.params.hatchTokens
 	market.tradingFeeRate = event.params.tradingFeeRate
 	market.platformFeeRate = event.params.platformFeeRate
-	market.platformFeeWithdrawer = ZERO_ADDRESS
+	market.platformOwner = ZERO_ADDRESS
 	market.platformFeeInvested = ZERO
 	market.allInterestToPlatform = event.params.allInterestToPlatform
 	market.nameVerifier = event.params.nameVerifier
@@ -60,8 +60,7 @@ export function handleNewToken(event: NewToken): void {
 	token.supply = ZERO
 	token.holders = 0
 	token.marketCap = ZERO
-	token.owner = ZERO_ADDRESS
-	token.interestWithdrawer = ZERO_ADDRESS
+	token.tokenOwner = ZERO_ADDRESS
 	token.daiInToken = ZERO
 	token.invested = ZERO
 	token.tokenInterestRedeemed = ZERO
