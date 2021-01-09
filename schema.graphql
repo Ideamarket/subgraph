@@ -43,6 +43,7 @@ type IdeaTokenPricePoint @entity {
   "<tx>-<logindex>"
   id: ID!
   token: IdeaToken!
+  counter: Int!
   timestamp: BigInt!
   oldPrice: BigDecimal!
   price: BigDecimal!
