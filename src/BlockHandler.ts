@@ -24,8 +24,8 @@ function checkDayValues(block: ethereum.Block): void {
 	let minTS = currentTS.minus(BigInt.fromI32(SECONDS_PER_DAY))
 	let numDrop = 0
 
-	for (let i = 0; i < blockHandlerValues.futureDayValueChanges.length; i++) {
-		let futureDayValueChange = FutureDayValueChange.load(first(futureDayValueChanges))
+	for (let i = 0; i < futureDayValueChanges.length; i++) {
+		let futureDayValueChange = FutureDayValueChange.load(futureDayValueChanges[i])
 		if (!futureDayValueChange) {
 			throw 'Failed to load FutureDayValueChange in checkDayValues'
 		}
