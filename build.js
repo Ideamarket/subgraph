@@ -116,7 +116,7 @@ async function main() {
 	if (network === 'rinkeby') {
 		jsonNetworkConfig['startBlock'] = 7590000
 	} else if (network === 'test') {
-		jsonNetworkConfig['startBlock'] = 7846000
+		jsonNetworkConfig['startBlock'] = 7990000
 	} else if (network === 'mainnet') {
 		jsonNetworkConfig['startBlock'] = 11000000
 	}
