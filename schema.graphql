@@ -32,9 +32,11 @@ type IdeaMarket @entity {
   nameVerifier: Bytes!
   daiInMarket: BigInt!
   invested: BigInt!
+  numTokens: Int!
   platformInterestRedeemed: BigInt!
   platformFeeRedeemed: BigInt!
   tokens: [IdeaToken!]! @derivedFrom(field: "market")
+  tokensOrderedByRank: [IdeaToken!]!
 }
 
 "============================================================ TOKEN ============================================================" 
@@ -92,6 +94,7 @@ type IdeaToken @entity {
   lockedAmount: BigInt!
   lockedPercentage: BigDecimal!
   lister: Bytes!
+  rank: Int!
   balances: [IdeaTokenBalance!]! @derivedFrom(field: "token")
   allowances: [IdeaTokenAllowance!]! @derivedFrom(field: "token")
   latestPricePoint: IdeaTokenPricePoint!

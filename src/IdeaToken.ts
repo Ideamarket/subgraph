@@ -1,5 +1,5 @@
 import { BigInt, BigDecimal } from '@graphprotocol/graph-ts'
-import { Transfer, Approval, OwnershipChanged } from '../res/generated/IdeaToken/IdeaToken'
+import { Transfer, Approval } from '../res/generated/IdeaToken/IdeaToken'
 import {
 	IdeaToken,
 	IdeaTokenBalance,

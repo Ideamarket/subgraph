@@ -1,5 +1,6 @@
 import { BigInt, ethereum } from '@graphprotocol/graph-ts'
 import {
+	BlockHandlerValues,
 	FutureDayValueChange,
 	IdeaToken,
 	IdeaTokenPricePoint,
@@ -13,12 +14,17 @@ import { updateTokenDayVolume } from './IdeaTokenExchange'
 import { SECONDS_PER_DAY, loadBlockHandlerValues, first } from './shared'
 
 export function blockHandler(block: ethereum.Block): void {
-	checkDayValues(block)
-	checkLockedTokens(block)
+	let blockHandlerValues = loadBlockHandlerValues()
+
+	let dayValuesChanged = checkDayValues(block, blockHandlerValues)
+	let lockedTokenChanged = checkLockedTokens(block, blockHandlerValues)
+
+	if (dayValuesChanged || lockedTokenChanged) {
+		blockHandlerValues.save()
+	}
 }
 
-function checkDayValues(block: ethereum.Block): void {
-	let blockHandlerValues = loadBlockHandlerValues()
+function checkDayValues(block: ethereum.Block, blockHandlerValues: BlockHandlerValues): boolean {
 	let futureDayValueChanges = blockHandlerValues.futureDayValueChanges
 	let currentTS = block.timestamp
 	let minTS = currentTS.minus(BigInt.fromI32(SECONDS_PER_DAY))
@@ -84,13 +90,13 @@ function checkDayValues(block: ethereum.Block): void {
 
 	if (numDrop > 0) {
 		blockHandlerValues.futureDayValueChanges = futureDayValueChanges.slice(numDrop)
-		blockHandlerValues.save()
+		return true
 	}
+
+	return false
 }
 
-function checkLockedTokens(block: ethereum.Block): void {
-	let blockHandlerValues = loadBlockHandlerValues()
-
+function checkLockedTokens(block: ethereum.Block, blockHandlerValues: BlockHandlerValues): boolean {
 	let futureUnlockedAmounts = blockHandlerValues.futureUnlockedAmounts
 	let currentTS = block.timestamp
 
@@ -126,6 +132,8 @@ function checkLockedTokens(block: ethereum.Block): void {
 	// Only save when we had a change, this saves sync time
 	if (hadChange) {
 		blockHandlerValues.futureUnlockedAmounts = futureUnlockedAmounts
-		blockHandlerValues.save()
+		return true
 	}
+
+	return false
 }

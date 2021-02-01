@@ -57,6 +57,13 @@ export function appendToArray(array: string[], append: string): string[] {
 	return array
 }
 
+export function swapArrayIndices(array: string[], i: i32, j: i32): string[] {
+	let cpy = array[i]
+	array[i] = array[j]
+	array[j] = cpy
+	return array
+}
+
 export function first(array: string[]): string {
 	return array[0]
 }

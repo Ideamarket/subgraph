@@ -10,7 +10,7 @@ import {
 import { IdeaMarket, IdeaToken, IdeaTokenFactory, IdeaTokenPricePoint } from '../res/generated/schema'
 
 import { blockHandler } from './BlockHandler'
-import { TEN_POW_18, ZERO_ADDRESS, ZERO, bigIntToBigDecimal, addFutureDayValueChange } from './shared'
+import { TEN_POW_18, ZERO_ADDRESS, ZERO, bigIntToBigDecimal, addFutureDayValueChange, appendToArray } from './shared'
 
 export function handleBlock(block: ethereum.Block): void {
 	blockHandler(block)
@@ -34,6 +34,8 @@ export function handleNewMarket(event: NewMarket): void {
 	market.invested = ZERO
 	market.platformFeeRedeemed = ZERO
 	market.platformInterestRedeemed = ZERO
+	market.numTokens = 0
+	market.tokensOrderedByRank = []
 	market.save()
 }
 
@@ -42,6 +44,8 @@ export function handleNewToken(event: NewToken): void {
 	if (!market) {
 		throw 'IdeaMarket does not exist on NewToken event'
 	}
+
+	market.numTokens = market.numTokens + 1
 
 	let tokenID = event.params.addr.toHex()
 
@@ -71,10 +75,14 @@ export function handleNewToken(event: NewToken): void {
 	token.lockedAmount = ZERO
 	token.lockedPercentage = BigDecimal.fromString('0.0')
 	token.lister = event.params.lister
+	token.rank = market.numTokens
 	token.latestPricePoint = pricePointID
 	token.dayPricePoints = [pricePointID]
 	token.dayVolumePoints = []
 	token.save()
+
+	market.tokensOrderedByRank = appendToArray(market.tokensOrderedByRank, token.id)
+	market.save()
 
 	addFutureDayValueChange(token as IdeaToken, event.block.timestamp)
 }

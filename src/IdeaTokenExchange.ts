@@ -11,7 +11,14 @@ import {
 } from '../res/generated/IdeaTokenExchange/IdeaTokenExchange'
 import { IdeaToken, IdeaMarket, IdeaTokenExchange, IdeaTokenVolumePoint } from '../res/generated/schema'
 
-import { TEN_POW_18, ZERO, bigIntToBigDecimal, addFutureDayValueChange, appendToArray } from './shared'
+import {
+	TEN_POW_18,
+	ZERO,
+	bigIntToBigDecimal,
+	addFutureDayValueChange,
+	appendToArray,
+	swapArrayIndices,
+} from './shared'
 
 export function handleInvestedState(event: InvestedState): void {
 	let exchange = IdeaTokenExchange.load(event.address.toHex())
@@ -32,17 +39,29 @@ export function handleInvestedState(event: InvestedState): void {
 		if (market.daiInMarket.lt(event.params.dai)) {
 			// Event was a buy
 			token.marketCap = token.marketCap.plus(event.params.dai.minus(market.daiInMarket))
+			updateTokenRankingOnBuy(token as IdeaToken, market as IdeaMarket)
 		} else {
 			// Event was a sell
 			token.marketCap = token.marketCap.minus(market.daiInMarket.minus(event.params.dai))
+			updateTokenRankingOnSell(token as IdeaToken, market as IdeaMarket)
 		}
 
 		market.daiInMarket = event.params.dai
 		market.invested = event.params.daiInvested
 	} else {
+		let oldMarketCap = token.marketCap
+
 		token.daiInToken = event.params.dai
 		token.marketCap = event.params.dai
 		token.invested = event.params.daiInvested
+
+		if (event.params.dai.gt(oldMarketCap)) {
+			// Event was a buy
+			updateTokenRankingOnBuy(token as IdeaToken, market as IdeaMarket)
+		} else {
+			// Event was a sell
+			updateTokenRankingOnSell(token as IdeaToken, market as IdeaMarket)
+		}
 	}
 
 	market.platformFeeInvested = event.params.platformFeeInvested
@@ -62,6 +81,64 @@ export function handleInvestedState(event: InvestedState): void {
 	token.save()
 	market.save()
 	exchange.save()
+}
+
+function updateTokenRankingOnBuy(currentToken: IdeaToken, market: IdeaMarket): void {
+	let orderedTokens = market.tokensOrderedByRank
+
+	let currentMarketCap = currentToken.marketCap
+	let currentTokenIndex = currentToken.rank - 1
+
+	for (let nextTokenIndex = currentTokenIndex - 1; nextTokenIndex >= 0; nextTokenIndex--, currentTokenIndex--) {
+		let nextToken = IdeaToken.load(orderedTokens[nextTokenIndex])
+		if (!nextToken) {
+			throw 'Failed to load IdeaToken on updateTokenRankingOnBuy'
+		}
+
+		let nextMarketCap = nextToken.marketCap
+		if (nextMarketCap.ge(currentMarketCap)) {
+			break
+		}
+
+		currentToken.rank = currentToken.rank - 1
+		nextToken.rank = nextToken.rank + 1
+		nextToken.save()
+
+		orderedTokens = swapArrayIndices(orderedTokens, currentTokenIndex, nextTokenIndex)
+	}
+
+	market.tokensOrderedByRank = orderedTokens
+}
+
+function updateTokenRankingOnSell(currentToken: IdeaToken, market: IdeaMarket): void {
+	let orderedTokens = market.tokensOrderedByRank
+
+	let currentMarketCap = currentToken.marketCap
+	let currentTokenIndex = currentToken.rank - 1
+
+	for (
+		let nextTokenIndex = currentTokenIndex + 1;
+		nextTokenIndex < orderedTokens.length;
+		nextTokenIndex++, currentTokenIndex++
+	) {
+		let nextToken = IdeaToken.load(orderedTokens[nextTokenIndex])
+		if (!nextToken) {
+			throw 'Failed to load IdeaToken on updateTokenRankingOnSell'
+		}
+
+		let nextMarketCap = nextToken.marketCap
+		if (nextMarketCap.le(currentMarketCap)) {
+			break
+		}
+
+		currentToken.rank = currentToken.rank + 1
+		nextToken.rank = nextToken.rank - 1
+		nextToken.save()
+
+		orderedTokens = swapArrayIndices(orderedTokens, currentTokenIndex, nextTokenIndex)
+	}
+
+	market.tokensOrderedByRank = orderedTokens
 }
 
 export function handleNewTokenOwner(event: NewTokenOwner): void {
