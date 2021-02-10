@@ -118,7 +118,7 @@ async function main() {
 	} else if (network === 'test') {
 		jsonNetworkConfig['startBlock'] = 7990000
 	} else if (network === 'mainnet') {
-		jsonNetworkConfig['startBlock'] = 11000000
+		jsonNetworkConfig['startBlock'] = 11830000
 	}
 
 	fs.writeFileSync('network-config.json', JSON.stringify(jsonNetworkConfig))
