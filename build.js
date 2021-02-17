@@ -114,7 +114,7 @@ async function main() {
 
 	// Hardcode the startblock values. Does not need to be accurate, just save some sync time
 	if (network === 'rinkeby') {
-		jsonNetworkConfig['startBlock'] = 7590000
+		jsonNetworkConfig['startBlock'] = 8086000
 	} else if (network === 'test') {
 		jsonNetworkConfig['startBlock'] = 8055800
 	} else if (network === 'mainnet') {
