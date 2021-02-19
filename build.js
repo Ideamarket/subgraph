@@ -126,16 +126,15 @@ async function main() {
 		jsonNetworkConfig[contract] = addr
 	}
 
-	if(startBlock === 0) {
 		// Hardcode the startblock values. Does not need to be accurate, just save some sync time
 		if (network === 'rinkeby') {
-			jsonNetworkConfig['startBlock'] = 8086000
+			jsonNetworkConfig['startBlock'] = startBlock > 0 ? startBlock : 8086000
 		} else if (network === 'test') {
-			jsonNetworkConfig['startBlock'] = 8055800
+			jsonNetworkConfig['startBlock'] = startBlock > 0 ? startBlock : 8055800
 		} else if (network === 'mainnet') {
-			jsonNetworkConfig['startBlock'] = 11830000
+			jsonNetworkConfig['startBlock'] = startBlock > 0 ? startBlock : 11830000
 		}
-	}
+	
 
 	fs.writeFileSync('network-config.json', JSON.stringify(jsonNetworkConfig))
 
