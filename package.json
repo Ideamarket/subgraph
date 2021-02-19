@@ -3,7 +3,7 @@
 	"license": "UNLICENSED",
 	"scripts": {
 		"codegen": "graph codegen",
-		"build:test": "node build.js --test --branch %npm_config_branch% --branch $npm_config_branch --start-block %npm_config_startblock% --branch $npm_config_startblock && graph build",
+		"build:test": "node build.js --test --branch %npm_config_branch% --branch $npm_config_branch --start-block %npm_config_startblock% --start-block $npm_config_startblock && graph build",
 		"build:rinkeby": "node build.js --rinkeby && graph build",
 		"build:mainnet": "node build.js --mainnet && graph build",
 		"deploy:test": "graph build && graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ Ideamarket/IdeamarketTEST",
