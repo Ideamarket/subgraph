@@ -17,21 +17,34 @@ const contracts = [
 ]
 
 async function main() {
+	let startBlock = 0
+	let branch = 'master'
 	let network = ''
 
 	for (let i = 0; i < process.argv.length; i++) {
 		if (process.argv[i] === '--rinkeby') {
 			network = 'rinkeby'
-			break
 		} else if (process.argv[i] === '--test') {
 			network = 'test'
-			break
 		} else if (process.argv[i] === '--mainnet') {
 			network = 'mainnet'
-			break
+		} else if(process.argv[i] === '--branch') {
+			const val = process.argv[i + 1]
+			if(val.startsWith('$') || val.startsWith('%')) {
+				continue
+			}
+			branch = val
+		} else if(process.argv[i] === '--start-block') {
+			const val = process.argv[i + 1]
+			if(val.startsWith('$') || val.startsWith('%')) {
+				continue
+			}
+			startBlock = parseInt(val)
 		}
 	}
 
+	console.log(`> Using branch ${branch}`)
+	console.log(startBlock > 0 ? `> Using startblock ${startBlock}` : `> Using hardcoded startBlock`)
 	// Create build dir if it does not exist
 	if (!fs.existsSync(buildDir)) {
 		console.log('> Creating build directory')
@@ -58,8 +71,9 @@ async function main() {
 	// Clean and update repo
 	process.chdir('./ideamarket')
 	console.log('> Cleaning and updating ideamarket repository')
-	await executeCmd('git fetch origin master')
-	await executeCmd('git reset --hard origin/master')
+	await executeCmd(`git fetch origin ${branch}`)
+	await executeCmd(`git checkout ${branch}`)
+	await executeCmd(`git reset --hard origin/${branch}`)
 
 	if (fs.existsSync('./build/contracts')) {
 		console.log('> Cleaning old contract build')
@@ -112,13 +126,15 @@ async function main() {
 		jsonNetworkConfig[contract] = addr
 	}
 
-	// Hardcode the startblock values. Does not need to be accurate, just save some sync time
-	if (network === 'rinkeby') {
-		jsonNetworkConfig['startBlock'] = 8086000
-	} else if (network === 'test') {
-		jsonNetworkConfig['startBlock'] = 8055800
-	} else if (network === 'mainnet') {
-		jsonNetworkConfig['startBlock'] = 11830000
+	if(startBlock === 0) {
+		// Hardcode the startblock values. Does not need to be accurate, just save some sync time
+		if (network === 'rinkeby') {
+			jsonNetworkConfig['startBlock'] = 8086000
+		} else if (network === 'test') {
+			jsonNetworkConfig['startBlock'] = 8055800
+		} else if (network === 'mainnet') {
+			jsonNetworkConfig['startBlock'] = 11830000
+		}
 	}
 
 	fs.writeFileSync('network-config.json', JSON.stringify(jsonNetworkConfig))
