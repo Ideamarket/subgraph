@@ -30,13 +30,13 @@ async function main() {
 			network = 'mainnet'
 		} else if(process.argv[i] === '--branch') {
 			const val = process.argv[i + 1]
-			if(val.startsWith('$') || val.startsWith('%')) {
+			if(!val || val.startsWith('$') || val.startsWith('%')) {
 				continue
 			}
 			branch = val
 		} else if(process.argv[i] === '--start-block') {
 			const val = process.argv[i + 1]
-			if(val.startsWith('$') || val.startsWith('%')) {
+			if(!val || val.startsWith('$') || val.startsWith('%')) {
 				continue
 			}
 			startBlock = parseInt(val)
