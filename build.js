@@ -24,6 +24,8 @@ async function main() {
 	for (let i = 0; i < process.argv.length; i++) {
 		if (process.argv[i] === '--rinkeby') {
 			network = 'rinkeby'
+		} else if (process.argv[i] === '--kovan') {
+			network = 'kovan'
 		} else if (process.argv[i] === '--test') {
 			network = 'test'
 		} else if (process.argv[i] === '--mainnet') {
@@ -129,6 +131,8 @@ async function main() {
 		// Hardcode the startblock values. Does not need to be accurate, just save some sync time
 		if (network === 'rinkeby') {
 			jsonNetworkConfig['startBlock'] = startBlock > 0 ? startBlock : 8086000
+		} else if (network === 'kovan') {
+			jsonNetworkConfig['startBlock'] = startBlock > 0 ? startBlock : 23960000
 		} else if (network === 'test') {
 			jsonNetworkConfig['startBlock'] = startBlock > 0 ? startBlock : 8055800
 		} else if (network === 'mainnet') {
