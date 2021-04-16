@@ -10,10 +10,11 @@ const abiDir = './abis'
 const contractsRepo = 'github.com/ideamarket/ideamarket-contracts.git'
 
 const contracts = [
-	['IdeaToken', 'core'],
-	['IdeaTokenFactory', 'core'],
-	['IdeaTokenExchange', 'core'],
-	['IdeaTokenVault', 'core'],
+	['IdeaTokenVault', 'shared/core'],
+	['IdeaToken', 'shared/core'],
+	['IdeaTokenVault', 'shared/core'],
+	['IdeaTokenFactory', 'evm/core'],
+	['IdeaTokenExchange', 'evm/core'],
 ]
 
 async function main() {
