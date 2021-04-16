@@ -26,17 +26,19 @@ async function main() {
 			network = 'rinkeby'
 		} else if (process.argv[i] === '--test') {
 			network = 'test'
+		} else if (process.argv[i] === '--kovan') {
+			network = 'kovan'
 		} else if (process.argv[i] === '--mainnet') {
 			network = 'mainnet'
-		} else if(process.argv[i] === '--branch') {
+		} else if (process.argv[i] === '--branch') {
 			const val = process.argv[i + 1]
-			if(!val || val.startsWith('$') || val.startsWith('%')) {
+			if (!val || val.startsWith('$') || val.startsWith('%')) {
 				continue
 			}
 			branch = val
-		} else if(process.argv[i] === '--start-block') {
+		} else if (process.argv[i] === '--start-block') {
 			const val = process.argv[i + 1]
-			if(!val || val.startsWith('$') || val.startsWith('%')) {
+			if (!val || val.startsWith('$') || val.startsWith('%')) {
 				continue
 			}
 			startBlock = parseInt(val)
@@ -126,15 +128,16 @@ async function main() {
 		jsonNetworkConfig[contract] = addr
 	}
 
-		// Hardcode the startblock values. Does not need to be accurate, just save some sync time
-		if (network === 'rinkeby') {
-			jsonNetworkConfig['startBlock'] = startBlock > 0 ? startBlock : 8086000
-		} else if (network === 'test') {
-			jsonNetworkConfig['startBlock'] = startBlock > 0 ? startBlock : 8055800
-		} else if (network === 'mainnet') {
-			jsonNetworkConfig['startBlock'] = startBlock > 0 ? startBlock : 11830000
-		}
-	
+	// Hardcode the startblock values. Does not need to be accurate, just save some sync time
+	if (network === 'rinkeby') {
+		jsonNetworkConfig['startBlock'] = startBlock > 0 ? startBlock : 8086000
+	} else if (network === 'test') {
+		jsonNetworkConfig['startBlock'] = startBlock > 0 ? startBlock : 8055800
+	} else if (network === 'mainnet') {
+		jsonNetworkConfig['startBlock'] = startBlock > 0 ? startBlock : 11830000
+	} else if (network === 'kovan') {
+		jsonNetworkConfig['startBlock'] = startBlock > 0 ? startBlock : 24277000
+	}
 
 	fs.writeFileSync('network-config.json', JSON.stringify(jsonNetworkConfig))
 
