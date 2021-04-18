@@ -2,9 +2,9 @@
 	"name": "Ideamarket",
 	"license": "UNLICENSED",
 	"scripts": {
-		"codegen": "graph codegen",
 		"build:test": "node build.js --test --branch %npm_config_branch% --branch $npm_config_branch --start-block %npm_config_startblock% --start-block $npm_config_startblock && graph build",
 		"build:kovan": "node build.js --kovan --branch %npm_config_branch% --branch $npm_config_branch --start-block %npm_config_startblock% --start-block $npm_config_startblock && graph build",
+		"build:kovan-avm": "node build.js --kovan-avm --branch %npm_config_branch% --branch $npm_config_branch --start-block %npm_config_startblock% --start-block $npm_config_startblock && graph build",
 		"build:rinkeby": "node build.js --rinkeby && graph build",
 		"build:mainnet": "node build.js --mainnet && graph build",
 		"deploy:test": "graph build && graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ Ideamarket/IdeamarketTEST",
@@ -12,14 +12,37 @@
 		"deploy:mainnet": "graph build && graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ Ideamarket/Ideamarket",
 		"create-local": "graph create --node http://localhost:8020/ Ideamarket/Ideamarket",
 		"remove-local": "graph remove --node http://localhost:8020/ Ideamarket/Ideamarket",
-		"deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 Ideamarket/Ideamarket"
+		"deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 Ideamarket/Ideamarket",
+		"lint": "eslint --fix --ext .js,.ts,.tsx --ignore-path .gitignore .",
+		"prettier": "prettier --ignore-path .gitignore --write \"**/*.+(js|json|ts|tsx)\"",
+		"format": "npm run prettier -- --write"
 	},
 	"dependencies": {
 		"@graphprotocol/graph-cli": "0.18.0",
 		"@graphprotocol/graph-ts": "0.18.0",
-		"mustache": "^4.0.1",
-		"prettier": "^2.1.2",
-		"typescript": "^4.0.3"
+		"mustache": "^4.0.1"
 	},
-	"devDependencies": {}
+	"devDependencies": {
+		"@commitlint/cli": "^12.1.1",
+		"@commitlint/config-conventional": "^12.1.1",
+		"@typescript-eslint/eslint-plugin": "^4.22.0",
+		"@typescript-eslint/parser": "^4.22.0",
+		"commitlint": "^12.1.1",
+		"eslint": "^7.24.0",
+		"eslint-config-prettier": "^8.2.0",
+		"eslint-plugin-prettier": "^3.4.0",
+		"husky": "^6.0.0",
+		"lint-staged": "^10.5.4",
+		"npm-run-all": "^4.1.5",
+		"prettier": "^2.2.1",
+		"typescript": "^4.2.4"
+	},
+	"lint-staged": {
+		"*.+(js|ts|tsx)": [
+			"npm run lint"
+		],
+		"*.+(js|json|ts|tsx)": [
+			"npm run format"
+		]
+	}
 }
