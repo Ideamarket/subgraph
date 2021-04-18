@@ -9,28 +9,104 @@ const buildDir = './res'
 const abiDir = './abis'
 const contractsRepo = 'github.com/ideamarket/ideamarket-contracts.git'
 
-const contracts = [
-	['IdeaTokenVault', 'shared/core'],
-	['IdeaToken', 'shared/core'],
-	['IdeaTokenVault', 'shared/core'],
-	['IdeaTokenFactory', 'evm/core'],
-	['IdeaTokenExchange', 'evm/core'],
-]
+const allContracts = {
+	evm: [
+		{
+			contractName: 'IdeaTokenVault',
+			deployedName: 'ideaTokenVault',
+			abiPath: 'shared/core/IdeaTokenVault.sol/IdeaTokenVault.json',
+		},
+		{
+			contractName: 'IdeaToken',
+			deployedName: 'ideaToken',
+			abiPath: 'shared/core/IdeaToken.sol/IdeaToken.json',
+		},
+		{
+			contractName: 'IdeaTokenFactory',
+			deployedName: 'ideaTokenFactory',
+			abiPath: 'evm/core/IdeaTokenFactory.sol/IdeaTokenFactory.json',
+		},
+		{
+			contractName: 'IdeaTokenExchange',
+			deployedName: 'ideaTokenExchange',
+			abiPath: 'evm/core/IdeaTokenExchange.sol/IdeaTokenExchange.json',
+		},
+	],
+	avm: [
+		{
+			contractName: 'IdeaTokenVault',
+			deployedName: 'ideaTokenVault',
+			abiPath: 'shared/core/IdeaTokenVault.sol/IdeaTokenVault.json',
+		},
+		{
+			contractName: 'IdeaToken',
+			deployedName: 'ideaToken',
+			abiPath: 'shared/core/IdeaToken.sol/IdeaToken.json',
+		},
+		{
+			contractName: 'IdeaTokenFactory',
+			deployedName: 'ideaTokenFactoryAVM',
+			abiPath: 'avm/core/IdeaTokenFactoryAVM.sol/IdeaTokenFactoryAVM.json',
+		},
+		{
+			contractName: 'IdeaTokenExchange',
+			deployedName: 'ideaTokenExchangeAVM',
+			abiPath: 'avm/core/IdeaTokenExchangeAVM.sol/IdeaTokenExchangeAVM.json',
+		},
+	],
+}
+
+const networks = {
+	mainnet: {
+		name: 'mainnet',
+		realNetworkName: 'mainnet',
+		startBlock: 11830000,
+	},
+	rinkeby: {
+		name: 'rinkeby',
+		realNetworkName: 'rinkeby',
+		startBlock: 8086000,
+	},
+	test: {
+		name: 'test',
+		realNetworkName: 'rinkeby',
+		startBlock: 8055800,
+	},
+	kovan: {
+		name: 'kovan',
+		realNetworkName: 'kovan',
+		startBlock: 24277000,
+	},
+	'kovan-avm': {
+		name: 'kovan-avm',
+		realNetworkName: 'kovan',
+		startBlock: 0,
+	},
+}
+
+let contracts
+let network
 
 async function main() {
 	let startBlock = 0
 	let branch = 'master'
-	let network = ''
 
 	for (let i = 0; i < process.argv.length; i++) {
 		if (process.argv[i] === '--rinkeby') {
-			network = 'rinkeby'
+			network = networks.rinkeby
+			contracts = allContracts.evm
 		} else if (process.argv[i] === '--test') {
-			network = 'test'
+			network = networks.test
+			contracts = allContracts.evm
 		} else if (process.argv[i] === '--kovan') {
-			network = 'kovan'
+			network = networks.kovan
+			contracts = allContracts.evm
+		} else if (process.argv[i] === '--kovan-avm') {
+			network = networks['kovan-avm']
+			contracts = allContracts.avm
 		} else if (process.argv[i] === '--mainnet') {
-			network = 'mainnet'
+			network = networks.mainnet
+			contracts = allContracts.evm
 		} else if (process.argv[i] === '--branch') {
 			const val = process.argv[i + 1]
 			if (!val || val.startsWith('$') || val.startsWith('%')) {
@@ -46,6 +122,7 @@ async function main() {
 		}
 	}
 
+	console.log(`> Using network ${network.name}`)
 	console.log(`> Using branch ${branch}`)
 	console.log(startBlock > 0 ? `> Using startblock ${startBlock}` : `> Using hardcoded startBlock`)
 	// Create build dir if it does not exist
@@ -105,40 +182,26 @@ async function main() {
 	// Extracts ABIs from contract build
 	console.log('> Extracting ABIs')
 	contracts.forEach((contract) => {
-		const file = contract[0] + '.json'
-		const curPath = path.join('ideamarket/build/contracts/contracts/', contract[1], contract[0] + '.sol', file)
-		if (!curPath.endsWith('.json')) {
-			console.log('>     ignoring file ' + curPath)
-			return
-		}
-
-		const rawArtifact = fs.readFileSync(curPath)
+		const rawArtifact = fs.readFileSync(path.join('ideamarket/build/contracts/contracts/', contract.abiPath))
 		const jsonArtifact = JSON.parse(rawArtifact)
 		const abi = JSON.stringify(jsonArtifact.abi)
-		fs.writeFileSync(path.join(abiDir, file), abi)
+		fs.writeFileSync(path.join(abiDir, contract.contractName + '.json'), abi)
 	})
 
 	// Extract addresses from deployed-{network}.json
 	console.log('> Extracting deployed addresses')
-	const rawDeployed = fs.readFileSync('ideamarket/deployed/deployed-' + network + '.json')
+	const rawDeployed = fs.readFileSync('ideamarket/deployed/deployed-' + network.name + '.json')
 	const jsonDeployed = JSON.parse(rawDeployed)
-	const jsonNetworkConfig = { network: network === 'test' ? 'rinkeby' : network }
+
+	const jsonNetworkConfig = { network: network.realNetworkName }
+
 	for (let i = 0; i < contracts.length; i++) {
-		const contract = contracts[i][0].charAt(0).toLowerCase() + contracts[i][0].slice(1)
-		const addr = jsonDeployed[contract]
-		jsonNetworkConfig[contract] = addr
+		const contract = contracts[i]
+		jsonNetworkConfig[contract.contractName] = jsonDeployed[contract.deployedName]
 	}
 
 	// Hardcode the startblock values. Does not need to be accurate, just save some sync time
-	if (network === 'rinkeby') {
-		jsonNetworkConfig['startBlock'] = startBlock > 0 ? startBlock : 8086000
-	} else if (network === 'test') {
-		jsonNetworkConfig['startBlock'] = startBlock > 0 ? startBlock : 8055800
-	} else if (network === 'mainnet') {
-		jsonNetworkConfig['startBlock'] = startBlock > 0 ? startBlock : 11830000
-	} else if (network === 'kovan') {
-		jsonNetworkConfig['startBlock'] = startBlock > 0 ? startBlock : 24277000
-	}
+	jsonNetworkConfig['startBlock'] = startBlock > 0 ? startBlock : network.startBlock
 
 	fs.writeFileSync('network-config.json', JSON.stringify(jsonNetworkConfig))
 

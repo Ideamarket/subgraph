@@ -35,7 +35,7 @@ dataSources:
     name: IdeaTokenFactory
     network: {{ network }}
     source:
-      address: "{{ ideaTokenFactory }}"
+      address: "{{ IdeaTokenFactory }}"
       abi: IdeaTokenFactory
       startBlock: {{ startBlock }}
     mapping:
@@ -75,7 +75,7 @@ dataSources:
     name: IdeaTokenExchange
     network: {{ network }}
     source:
-      address: "{{ ideaTokenExchange }}"
+      address: "{{ IdeaTokenExchange }}"
       abi: IdeaTokenExchange
       startBlock: {{ startBlock }}
     mapping:
@@ -115,7 +115,7 @@ dataSources:
     name: IdeaTokenVault
     network: {{ network }}
     source:
-      address: "{{ ideaTokenVault }}"
+      address: "{{ IdeaTokenVault }}"
       abi: IdeaTokenVault
       startBlock: {{ startBlock }}
     mapping:
