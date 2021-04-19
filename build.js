@@ -80,7 +80,7 @@ const networks = {
 	'kovan-avm': {
 		name: 'kovan-avm',
 		realNetworkName: 'kovan',
-		startBlock: 0,
+		startBlock: 128000,
 	},
 }
 
