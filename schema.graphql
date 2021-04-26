@@ -66,6 +66,7 @@ type IdeaTokenBalance @entity {
   amount: BigInt!
   token: IdeaToken!
   market: IdeaMarket!
+  daiInvested: BigDecimal!
 }
 
 type IdeaTokenAllowance @entity {

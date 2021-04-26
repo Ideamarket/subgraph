@@ -50,6 +50,8 @@ export function handleTransfer(event: Transfer): void {
 			throw 'FromBalance is not defined on Transfer event'
 		}
 		fromBalance.amount = fromBalance.amount.minus(event.params.value)
+		const priceSold = calculateDecimalPriceFromSupply(token.supply, market!).times(event.params.value.toBigDecimal());
+		fromBalance.daiInvested = fromBalance.daiInvested.minus(priceSold);
 		fromBalance.save()
 
 		// If the balance is decreased to zero remove one holder
@@ -74,9 +76,12 @@ export function handleTransfer(event: Transfer): void {
 			toBalance.amount = ZERO
 			toBalance.token = token.id
 			toBalance.market = market.id
+			toBalance.daiInvested = ZERO.toBigDecimal();
 		}
 		let beforeBalance = toBalance.amount
 		toBalance.amount = toBalance.amount.plus(event.params.value)
+		const pricePaid = calculateDecimalPriceFromSupply(token.supply, market!).times(event.params.value.toBigDecimal());
+		toBalance.daiInvested = toBalance.daiInvested.plus(pricePaid);
 		toBalance.save()
 
 		// If the balance is was zero before and now is greater than zero add one holder
