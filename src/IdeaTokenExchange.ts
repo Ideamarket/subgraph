@@ -18,19 +18,44 @@ import {
 	addFutureDayValueChange,
 	appendToArray,
 	swapArrayIndices,
+	ZERO_ADDRESS,
 } from './shared'
 
 export function handleInvestedState(event: InvestedState): void {
 	let exchange = IdeaTokenExchange.load(event.address.toHex())
-	let market = IdeaMarket.load(event.params.marketID.toHex())
-	let token = IdeaToken.load(event.params.ideaToken.toHex())
-
 	if (!exchange) {
 		throw 'IdeaTokenExchange does not exist on InvestedState event'
 	}
+
+	// =============== STATE TRANSFER ===============
+
+	if (event.params.marketID.equals(ZERO)) {
+		// Static Vars
+		exchange.tradingFeeInvested = event.params.tradingFeeInvested
+		exchange.save()
+		return
+	}
+
+	let market = IdeaMarket.load(event.params.marketID.toHex())
 	if (!market) {
 		throw 'Market does not exist on InvestedState event'
 	}
+
+	if (event.params.ideaToken.equals(ZERO_ADDRESS)) {
+		// Platform vars
+		exchange.tradingFeeInvested = event.params.tradingFeeInvested
+		market.daiInMarket = event.params.dai
+		market.invested = event.params.daiInvested
+		market.platformFeeInvested = event.params.platformFeeInvested
+		market.save()
+		exchange.save()
+		return
+	}
+
+	// ==============================================
+
+	let token = IdeaToken.load(event.params.ideaToken.toHex())
+
 	if (!token) {
 		throw 'IdeaToken does not exist on InvestedState event'
 	}

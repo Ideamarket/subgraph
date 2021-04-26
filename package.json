@@ -15,7 +15,8 @@
 		"deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 Ideamarket/Ideamarket",
 		"lint": "eslint --fix --ext .js,.ts,.tsx --ignore-path .gitignore .",
 		"prettier": "prettier --ignore-path .gitignore --write \"**/*.+(js|json|ts|tsx)\"",
-		"format": "npm run prettier -- --write"
+		"format": "npm run prettier -- --write",
+		"prepare": "husky install"
 	},
 	"dependencies": {
 		"@graphprotocol/graph-cli": "0.18.0",
