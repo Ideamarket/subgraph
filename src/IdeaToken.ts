@@ -14,6 +14,7 @@ import {
 	ZERO_ADDRESS,
 	ZERO,
 	TEN_POW_18,
+	TEN_POW_18_BIG_INT,
 	bigIntToBigDecimal,
 	appendToArray,
 	addFutureDayValueChange,
@@ -22,7 +23,6 @@ import {
 } from './shared'
 
 let FEE_SCALE = BigInt.fromI32(10000)
-let gweiAdjustment = BigInt.fromI32(10).pow(18)
 
 export function handleTransfer(event: Transfer): void {
 	let token = IdeaToken.load(event.address.toHex())
@@ -48,8 +48,10 @@ export function handleTransfer(event: Transfer): void {
 			throw 'FromBalance is not defined on Transfer event'
 		}
 		fromBalance.amount = fromBalance.amount.minus(event.params.value)
-		let priceSold = getTotalSellPrice(event, token as IdeaToken, market as IdeaMarket)
-		fromBalance.daiPNL = fromBalance.daiPNL.minus(priceSold)
+
+		// PNL calculation
+		let priceSold = getTotalSellPrice(market as IdeaMarket, event.params.value, token.supply)
+		fromBalance.daiPNL = fromBalance.daiPNL.plus(priceSold)
 		fromBalance.save()
 
 		// If the balance is decreased to zero remove one holder
@@ -78,8 +80,17 @@ export function handleTransfer(event: Transfer): void {
 		}
 		let beforeBalance = toBalance.amount
 		toBalance.amount = toBalance.amount.plus(event.params.value)
-		let pricePaid = getTotalBuyPrice(event, token as IdeaToken, market as IdeaMarket)
-		toBalance.daiPNL = toBalance.daiPNL.plus(pricePaid)
+
+		// PNL calculation
+		let pricePaid: BigInt
+		if (event.params.from.equals(ZERO_ADDRESS)) {
+			// Mint (buy)
+			pricePaid = getTotalBuyPrice(market as IdeaMarket, event.params.value, token.supply)
+		} else {
+			// Transfer
+			pricePaid = getTotalSellPrice(market as IdeaMarket, event.params.value, token.supply)
+		}
+		toBalance.daiPNL = toBalance.daiPNL.minus(pricePaid)
 		toBalance.save()
 
 		// If the balance is was zero before and now is greater than zero add one holder
@@ -155,70 +166,70 @@ export function updateTokenDayPriceChange(token: IdeaToken): void {
 	token.dayChange = endPricePoint.price.div(startPricePoint.oldPrice).minus(BigDecimal.fromString('1'))
 }
 
-function getRawBuyPrice(event: Transfer, token: IdeaToken, market: IdeaMarket): BigInt {
+function getRawBuyPrice(market: IdeaMarket, amount: BigInt, supply: BigInt): BigInt {
 	let hatchCost = ZERO
-	let updatedAmount = event.params.value
+	let updatedAmount = amount
 	let updatedSupply: BigInt
 
-	if (token.supply < market.hatchTokens) {
-		let remainingHatchTokens = market.hatchTokens.minus(token.supply)
+	if (supply < market.hatchTokens) {
+		let remainingHatchTokens = market.hatchTokens.minus(supply)
 
 		if (updatedAmount <= remainingHatchTokens) {
-			return market.baseCost.times(updatedAmount).div(gweiAdjustment)
+			return market.baseCost.times(updatedAmount).div(TEN_POW_18_BIG_INT)
 		}
 
-		hatchCost = market.baseCost.times(remainingHatchTokens).div(gweiAdjustment)
+		hatchCost = market.baseCost.times(remainingHatchTokens).div(TEN_POW_18_BIG_INT)
 		updatedSupply = ZERO
 		updatedAmount = updatedAmount.minus(remainingHatchTokens)
 	} else {
-		updatedSupply = token.supply.minus(market.hatchTokens)
+		updatedSupply = supply.minus(market.hatchTokens)
 	}
 
-	let priceAtSupply = market.baseCost.plus(market.priceRise.times(updatedSupply)).div(gweiAdjustment)
+	let priceAtSupply = market.baseCost.plus(market.priceRise.times(updatedSupply)).div(TEN_POW_18_BIG_INT)
 	let priceAtSupplyPlusAmount = market.baseCost.plus(
-		market.priceRise.times(updatedSupply.plus(updatedAmount)).div(gweiAdjustment)
+		market.priceRise.times(updatedSupply.plus(updatedAmount)).div(TEN_POW_18_BIG_INT)
 	)
 	let average = priceAtSupply.plus(priceAtSupplyPlusAmount.div(BigInt.fromI32(2)))
 
-	return hatchCost.plus(average.times(updatedAmount).div(gweiAdjustment))
+	return hatchCost.plus(average.times(updatedAmount).div(TEN_POW_18_BIG_INT))
 }
 
-function getTotalBuyPrice(event: Transfer, token: IdeaToken, market: IdeaMarket): BigInt {
-	let rawCost = getRawBuyPrice(event, token, market)
+function getTotalBuyPrice(market: IdeaMarket, amount: BigInt, supply: BigInt): BigInt {
+	let rawCost = getRawBuyPrice(market, amount, supply)
 	let tradingFee = rawCost.times(market.tradingFeeRate).div(FEE_SCALE)
 	let platformFee = rawCost.times(market.platformFeeRate).div(FEE_SCALE)
 	return rawCost.plus(tradingFee).plus(platformFee)
 }
 
-function getRawSellPrice(event: Transfer, token: IdeaToken, market: IdeaMarket): BigInt {
+function getRawSellPrice(market: IdeaMarket, amount: BigInt, supply: BigInt): BigInt {
 	let hatchPrice = ZERO
-	let updatedAmount = event.params.value
+	let updatedAmount = amount
 	let updatedSupply: BigInt
 
-	if (token.supply.minus(updatedAmount) < market.hatchTokens) {
+	if (supply.minus(updatedAmount) < market.hatchTokens) {
 		if (updatedAmount <= market.hatchTokens) {
-			return market.baseCost.times(updatedAmount).div(gweiAdjustment)
+			return market.baseCost.times(updatedAmount).div(TEN_POW_18_BIG_INT)
 		}
 
-		let tokensInHatch = market.hatchTokens.minus(token.supply.minus(updatedAmount))
-		hatchPrice = market.baseCost.times(tokensInHatch).div(gweiAdjustment)
-		updatedSupply = token.supply.minus(market.hatchTokens)
+		let tokensInHatch = market.hatchTokens.minus(supply.minus(updatedAmount))
+		hatchPrice = market.baseCost.times(tokensInHatch).div(TEN_POW_18_BIG_INT)
+		updatedSupply = supply.minus(market.hatchTokens)
 		updatedAmount = updatedAmount.minus(tokensInHatch)
 	} else {
-		updatedSupply = token.supply.minus(market.hatchTokens)
+		updatedSupply = supply.minus(market.hatchTokens)
 	}
 
-	let priceAtSupply = market.baseCost.plus(market.priceRise.times(updatedSupply)).div(gweiAdjustment)
+	let priceAtSupply = market.baseCost.plus(market.priceRise.times(updatedSupply)).div(TEN_POW_18_BIG_INT)
 	let priceAtSupplyMinusAmount = market.baseCost.plus(
-		market.priceRise.times(updatedSupply.minus(updatedAmount)).div(gweiAdjustment)
+		market.priceRise.times(updatedSupply.minus(updatedAmount)).div(TEN_POW_18_BIG_INT)
 	)
 	let average = priceAtSupply.plus(priceAtSupplyMinusAmount.div(BigInt.fromI32(2)))
 
-	return hatchPrice.plus(average.times(updatedAmount).div(gweiAdjustment))
+	return hatchPrice.plus(average.times(updatedAmount).div(TEN_POW_18_BIG_INT))
 }
 
-function getTotalSellPrice(event: Transfer, token: IdeaToken, market: IdeaMarket): BigInt {
-	let rawPrice = getRawSellPrice(event, token, market)
+function getTotalSellPrice(market: IdeaMarket, amount: BigInt, supply: BigInt): BigInt {
+	let rawPrice = getRawSellPrice(market, amount, supply)
 	let tradingFee = rawPrice.times(market.tradingFeeRate).div(FEE_SCALE)
 	let platformFee = rawPrice.times(market.platformFeeRate).div(FEE_SCALE)
 	return rawPrice.minus(tradingFee).minus(platformFee)
