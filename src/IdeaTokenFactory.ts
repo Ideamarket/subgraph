@@ -8,7 +8,7 @@ import {
 	NewTradingFee,
 } from '../res/generated/IdeaTokenFactory/IdeaTokenFactory'
 import { IdeaMarket, IdeaToken, IdeaTokenFactory, IdeaTokenPricePoint } from '../res/generated/schema'
-
+import { IdeaToken as IdeaTokenERC20 } from '../res/generated/templates'
 import { blockHandler } from './BlockHandler'
 import { TEN_POW_18, ZERO_ADDRESS, ZERO, bigIntToBigDecimal, addFutureDayValueChange, appendToArray } from './shared'
 
@@ -85,6 +85,8 @@ export function handleNewToken(event: NewToken): void {
 	market.save()
 
 	addFutureDayValueChange(token as IdeaToken, event.block.timestamp)
+
+	IdeaTokenERC20.create(event.params.addr)
 }
 
 export function handleNewNameVerifier(event: NewNameVerifier): void {

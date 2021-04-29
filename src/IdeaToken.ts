@@ -1,5 +1,5 @@
 import { BigInt, BigDecimal } from '@graphprotocol/graph-ts'
-import { Transfer, Approval } from '../res/generated/IdeaToken/IdeaToken'
+import { Transfer, Approval } from '../res/generated/templates/IdeaToken/IdeaToken'
 import {
 	IdeaToken,
 	IdeaTokenBalance,
@@ -23,13 +23,8 @@ import {
 
 export function handleTransfer(event: Transfer): void {
 	let token = IdeaToken.load(event.address.toHex())
-	// This event triggers on every Transfer event, also from ERC20s
-	// which are not part of Ideamarket
-	//
-	// If the token does not exist, it means this event is from an external
-	// ERC20 and we can ignore it
 	if (!token) {
-		return
+		throw 'Token does not exist on Transfer event'
 	}
 
 	let market = IdeaMarket.load(token.market)
@@ -90,13 +85,8 @@ export function handleTransfer(event: Transfer): void {
 
 export function handleApproval(event: Approval): void {
 	let token = IdeaToken.load(event.address.toHex())
-	// This event triggers on every Approval event, also from ERC20s
-	// which are not part of Ideamarket
-	//
-	// If the token does not exist, it means this event is from an external
-	// ERC20 and we can ignore it
 	if (!token) {
-		return
+		throw 'Token does not exist on Approval event'
 	}
 
 	let allowanceID = event.params.owner.toHex() + '-' + event.params.spender.toHex() + '-' + token.id

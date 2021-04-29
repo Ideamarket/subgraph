@@ -1,14 +1,13 @@
 specVersion: 0.0.2
 schema:
   file: ./schema.graphql
-dataSources:
+templates:
   # ============================== IdeaToken ==============================
   - kind: ethereum/contract
     name: IdeaToken
     network: {{ network }} 
     source:
       abi: IdeaToken
-      startBlock: {{ startBlock }}
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -30,6 +29,7 @@ dataSources:
         - event: Approval(indexed address,indexed address,uint256)
           handler: handleApproval
       file: ./src/IdeaToken.ts
+dataSources:
   # ============================== IdeaTokenFactory ==============================
   - kind: ethereum/contract
     name: IdeaTokenFactory
