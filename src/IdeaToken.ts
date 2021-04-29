@@ -21,8 +21,8 @@ import {
 	last,
 } from './shared'
 
-const FEE_SCALE = new BigInt(10000);
-const gweiAdjustment = BigInt.fromI32(10).pow(18);
+let FEE_SCALE = BigInt.fromI32(10000)
+let gweiAdjustment = BigInt.fromI32(10).pow(18)
 
 export function handleTransfer(event: Transfer): void {
 	let token = IdeaToken.load(event.address.toHex())
@@ -48,8 +48,8 @@ export function handleTransfer(event: Transfer): void {
 			throw 'FromBalance is not defined on Transfer event'
 		}
 		fromBalance.amount = fromBalance.amount.minus(event.params.value)
-		const priceSold = getTotalSellPrice(event, token as IdeaToken, market as IdeaMarket);
-		fromBalance.daiInvested = fromBalance.daiInvested.minus(priceSold);
+		let priceSold = getTotalSellPrice(event, token as IdeaToken, market as IdeaMarket)
+		fromBalance.daiPNL = fromBalance.daiPNL.minus(priceSold)
 		fromBalance.save()
 
 		// If the balance is decreased to zero remove one holder
@@ -74,12 +74,12 @@ export function handleTransfer(event: Transfer): void {
 			toBalance.amount = ZERO
 			toBalance.token = token.id
 			toBalance.market = market.id
-			toBalance.daiInvested = ZERO;
+			toBalance.daiPNL = ZERO
 		}
 		let beforeBalance = toBalance.amount
 		toBalance.amount = toBalance.amount.plus(event.params.value)
-		const pricePaid = getTotalBuyPrice(event, token as IdeaToken, market as IdeaMarket);
-		toBalance.daiInvested = toBalance.daiInvested.plus(pricePaid);
+		let pricePaid = getTotalBuyPrice(event, token as IdeaToken, market as IdeaMarket)
+		toBalance.daiPNL = toBalance.daiPNL.plus(pricePaid)
 		toBalance.save()
 
 		// If the balance is was zero before and now is greater than zero add one holder
@@ -156,69 +156,70 @@ export function updateTokenDayPriceChange(token: IdeaToken): void {
 }
 
 function getRawBuyPrice(event: Transfer, token: IdeaToken, market: IdeaMarket): BigInt {
-	let hatchCost = ZERO;
-	let updatedAmount = event.params.value;
-	let updatedSupply: BigInt;
-	
+	let hatchCost = ZERO
+	let updatedAmount = event.params.value
+	let updatedSupply: BigInt
 
 	if (token.supply < market.hatchTokens) {
-		let remainingHatchTokens = market.hatchTokens.minus(token.supply);
+		let remainingHatchTokens = market.hatchTokens.minus(token.supply)
 
 		if (updatedAmount <= remainingHatchTokens) {
 			return market.baseCost.times(updatedAmount).div(gweiAdjustment)
 		}
-			
-		hatchCost = market.baseCost.times(remainingHatchTokens).div(gweiAdjustment);
-		updatedSupply = ZERO;
-		updatedAmount = updatedAmount.minus(remainingHatchTokens);
-	}
-	else {
-		updatedSupply = token.supply.minus(market.hatchTokens);
+
+		hatchCost = market.baseCost.times(remainingHatchTokens).div(gweiAdjustment)
+		updatedSupply = ZERO
+		updatedAmount = updatedAmount.minus(remainingHatchTokens)
+	} else {
+		updatedSupply = token.supply.minus(market.hatchTokens)
 	}
 
-	const priceAtSupply = market.baseCost.plus(market.priceRise.times(updatedSupply)).div(gweiAdjustment);
-	const priceAtSupplyPlusAmount = market.baseCost.plus(market.priceRise.times(updatedSupply.plus(updatedAmount)).div(gweiAdjustment))
-	const average = priceAtSupply.plus(priceAtSupplyPlusAmount.div(new BigInt(2)));
+	let priceAtSupply = market.baseCost.plus(market.priceRise.times(updatedSupply)).div(gweiAdjustment)
+	let priceAtSupplyPlusAmount = market.baseCost.plus(
+		market.priceRise.times(updatedSupply.plus(updatedAmount)).div(gweiAdjustment)
+	)
+	let average = priceAtSupply.plus(priceAtSupplyPlusAmount.div(BigInt.fromI32(2)))
 
-	return hatchCost.plus(average.times(updatedAmount).div(gweiAdjustment));
+	return hatchCost.plus(average.times(updatedAmount).div(gweiAdjustment))
 }
 
 function getTotalBuyPrice(event: Transfer, token: IdeaToken, market: IdeaMarket): BigInt {
-	const rawCost = getRawBuyPrice(event, token, market);
-	const tradingFee = rawCost.times(market.tradingFeeRate).div(FEE_SCALE);
-	const platformFee = rawCost.times(market.platformFeeRate).div(FEE_SCALE);
-	return rawCost.plus(tradingFee).plus(platformFee);
+	let rawCost = getRawBuyPrice(event, token, market)
+	let tradingFee = rawCost.times(market.tradingFeeRate).div(FEE_SCALE)
+	let platformFee = rawCost.times(market.platformFeeRate).div(FEE_SCALE)
+	return rawCost.plus(tradingFee).plus(platformFee)
 }
 
 function getRawSellPrice(event: Transfer, token: IdeaToken, market: IdeaMarket): BigInt {
-	let hatchPrice = ZERO;
-	let updatedAmount = event.params.value;
-	let updatedSupply: BigInt;
+	let hatchPrice = ZERO
+	let updatedAmount = event.params.value
+	let updatedSupply: BigInt
 
 	if (token.supply.minus(updatedAmount) < market.hatchTokens) {
 		if (updatedAmount <= market.hatchTokens) {
 			return market.baseCost.times(updatedAmount).div(gweiAdjustment)
 		}
-		
-		const tokensInHatch = market.hatchTokens.minus(token.supply.minus(updatedAmount));
-		hatchPrice = market.baseCost.times(tokensInHatch).div(gweiAdjustment);
-		updatedSupply = token.supply.minus(market.hatchTokens);
-		updatedAmount = updatedAmount.minus(tokensInHatch);
-	}
-	else {
-		updatedSupply = token.supply.minus(market.hatchTokens);
+
+		let tokensInHatch = market.hatchTokens.minus(token.supply.minus(updatedAmount))
+		hatchPrice = market.baseCost.times(tokensInHatch).div(gweiAdjustment)
+		updatedSupply = token.supply.minus(market.hatchTokens)
+		updatedAmount = updatedAmount.minus(tokensInHatch)
+	} else {
+		updatedSupply = token.supply.minus(market.hatchTokens)
 	}
 
-	const priceAtSupply = market.baseCost.plus(market.priceRise.times(updatedSupply)).div(gweiAdjustment);
-	const priceAtSupplyMinusAmount = market.baseCost.plus(market.priceRise.times(updatedSupply.minus(updatedAmount)).div(gweiAdjustment))
-	const average = priceAtSupply.plus(priceAtSupplyMinusAmount.div(new BigInt(2)));
+	let priceAtSupply = market.baseCost.plus(market.priceRise.times(updatedSupply)).div(gweiAdjustment)
+	let priceAtSupplyMinusAmount = market.baseCost.plus(
+		market.priceRise.times(updatedSupply.minus(updatedAmount)).div(gweiAdjustment)
+	)
+	let average = priceAtSupply.plus(priceAtSupplyMinusAmount.div(BigInt.fromI32(2)))
 
-	return hatchPrice.plus(average.times(updatedAmount).div(gweiAdjustment));
+	return hatchPrice.plus(average.times(updatedAmount).div(gweiAdjustment))
 }
 
 function getTotalSellPrice(event: Transfer, token: IdeaToken, market: IdeaMarket): BigInt {
-	const rawPrice = getRawSellPrice(event, token, market);
-	const tradingFee = rawPrice.times(market.tradingFeeRate).div(FEE_SCALE);
-	const platformFee = rawPrice.times(market.platformFeeRate).div(FEE_SCALE);
-	return rawPrice.minus(tradingFee).minus(platformFee);
+	let rawPrice = getRawSellPrice(event, token, market)
+	let tradingFee = rawPrice.times(market.tradingFeeRate).div(FEE_SCALE)
+	let platformFee = rawPrice.times(market.platformFeeRate).div(FEE_SCALE)
+	return rawPrice.minus(tradingFee).minus(platformFee)
 }
