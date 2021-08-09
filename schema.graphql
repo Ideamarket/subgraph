@@ -119,12 +119,24 @@ type IdeaTokenExchange @entity {
 }
 
 type LockedIdeaTokenAmount @entity {
-  "<tx hash>-<log index>"
+  "id: <tx hash>-<log index>"
   id: ID!
   token: IdeaToken!
   owner: Bytes!
   amount: BigInt!
   lockedUntil: BigInt!
+}
+
+"============================================================ TRADES ============================================================" 
+type IdeaTokenTrade @entity {
+  "id: <tx hash>-<log index>"
+  id: ID!
+  token: IdeaToken!
+  owner: Bytes!
+  isBuy: Boolean!
+  timestamp: BigInt!
+  ideaTokenAmount: BigInt!
+  daiAmount: BigInt!
 }
 
 "========================================================== BLOCK HANDLER =======================================================" 
