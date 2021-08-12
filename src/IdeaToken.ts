@@ -177,10 +177,10 @@ function getRawBuyPrice(market: IdeaMarket, amount: BigInt, supply: BigInt): Big
 	let updatedAmount = amount
 	let updatedSupply: BigInt
 
-	if (supply < market.hatchTokens) {
+	if (supply.lt(market.hatchTokens)) {
 		let remainingHatchTokens = market.hatchTokens.minus(supply)
 
-		if (updatedAmount <= remainingHatchTokens) {
+		if (updatedAmount.lt(remainingHatchTokens) || updatedAmount.equals(remainingHatchTokens)) {
 			return market.baseCost.times(updatedAmount).div(TEN_POW_18_BIG_INT)
 		}
 
@@ -212,8 +212,8 @@ function getRawSellPrice(market: IdeaMarket, amount: BigInt, supply: BigInt): Bi
 	let updatedAmount = amount
 	let updatedSupply: BigInt
 
-	if (supply.minus(updatedAmount) < market.hatchTokens) {
-		if (updatedAmount <= market.hatchTokens) {
+	if (supply.minus(updatedAmount).lt(market.hatchTokens)) {
+		if (updatedAmount.lt(market.hatchTokens) || updatedAmount.equals(market.hatchTokens)) {
 			return market.baseCost.times(updatedAmount).div(TEN_POW_18_BIG_INT)
 		}
 
