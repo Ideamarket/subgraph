@@ -195,7 +195,7 @@ function getRawBuyPrice(market: IdeaMarket, amount: BigInt, supply: BigInt): Big
 	let priceAtSupplyPlusAmount = market.baseCost.plus(
 		market.priceRise.times(updatedSupply.plus(updatedAmount)).div(TEN_POW_18_BIG_INT)
 	)
-	let average = priceAtSupply.plus(priceAtSupplyPlusAmount.div(BigInt.fromI32(2)))
+	let average = priceAtSupply.plus(priceAtSupplyPlusAmount).div(BigInt.fromI32(2))
 
 	return hatchCost.plus(average.times(updatedAmount).div(TEN_POW_18_BIG_INT))
 }
@@ -229,7 +229,7 @@ function getRawSellPrice(market: IdeaMarket, amount: BigInt, supply: BigInt): Bi
 	let priceAtSupplyMinusAmount = market.baseCost.plus(
 		market.priceRise.times(updatedSupply.minus(updatedAmount)).div(TEN_POW_18_BIG_INT)
 	)
-	let average = priceAtSupply.plus(priceAtSupplyMinusAmount.div(BigInt.fromI32(2)))
+	let average = priceAtSupply.plus(priceAtSupplyMinusAmount).div(BigInt.fromI32(2))
 
 	return hatchPrice.plus(average.times(updatedAmount).div(TEN_POW_18_BIG_INT))
 }
