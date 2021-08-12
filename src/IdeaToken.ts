@@ -174,24 +174,24 @@ export function updateTokenDayPriceChange(token: IdeaToken): void {
 
 function getRawBuyPrice(market: IdeaMarket, amount: BigInt, supply: BigInt): BigInt {
 	let hatchCost = ZERO
-	let updatedAmount = amount
-	let updatedSupply: BigInt
+    let updatedAmount = amount
+    let updatedSupply: BigInt
 
 	if (supply.lt(market.hatchTokens)) {
 		let remainingHatchTokens = market.hatchTokens.minus(supply)
 
-		if (updatedAmount.lt(remainingHatchTokens) || updatedAmount.equals(remainingHatchTokens)) {
+		if (amount.lt(remainingHatchTokens) || amount.equals(remainingHatchTokens)) {
 			return market.baseCost.times(updatedAmount).div(TEN_POW_18_BIG_INT)
 		}
 
 		hatchCost = market.baseCost.times(remainingHatchTokens).div(TEN_POW_18_BIG_INT)
 		updatedSupply = ZERO
-		updatedAmount = updatedAmount.minus(remainingHatchTokens)
+		updatedAmount = amount.minus(remainingHatchTokens)
 	} else {
 		updatedSupply = supply.minus(market.hatchTokens)
 	}
 
-	let priceAtSupply = market.baseCost.plus(market.priceRise.times(updatedSupply)).div(TEN_POW_18_BIG_INT)
+	let priceAtSupply = market.baseCost.plus(market.priceRise.times(updatedSupply).div(TEN_POW_18_BIG_INT))
 	let priceAtSupplyPlusAmount = market.baseCost.plus(
 		market.priceRise.times(updatedSupply.plus(updatedAmount)).div(TEN_POW_18_BIG_INT)
 	)
@@ -212,20 +212,20 @@ function getRawSellPrice(market: IdeaMarket, amount: BigInt, supply: BigInt): Bi
 	let updatedAmount = amount
 	let updatedSupply: BigInt
 
-	if (supply.minus(updatedAmount).lt(market.hatchTokens)) {
-		if (updatedAmount.lt(market.hatchTokens) || updatedAmount.equals(market.hatchTokens)) {
-			return market.baseCost.times(updatedAmount).div(TEN_POW_18_BIG_INT)
+	if (supply.minus(amount).lt(market.hatchTokens)) {
+		if(supply.lt(market.hatchTokens) || supply.equals(market.hatchTokens)) {
+			return market.baseCost.times(amount).div(TEN_POW_18_BIG_INT)
 		}
 
-		let tokensInHatch = market.hatchTokens.minus(supply.minus(updatedAmount))
+		let tokensInHatch = market.hatchTokens.minus(supply.minus(amount))
 		hatchPrice = market.baseCost.times(tokensInHatch).div(TEN_POW_18_BIG_INT)
-		updatedSupply = supply.minus(market.hatchTokens)
 		updatedAmount = updatedAmount.minus(tokensInHatch)
+		updatedSupply = supply.minus(market.hatchTokens)
 	} else {
 		updatedSupply = supply.minus(market.hatchTokens)
 	}
 
-	let priceAtSupply = market.baseCost.plus(market.priceRise.times(updatedSupply)).div(TEN_POW_18_BIG_INT)
+	let priceAtSupply = market.baseCost.plus(market.priceRise.times(updatedSupply).div(TEN_POW_18_BIG_INT))
 	let priceAtSupplyMinusAmount = market.baseCost.plus(
 		market.priceRise.times(updatedSupply.minus(updatedAmount)).div(TEN_POW_18_BIG_INT)
 	)
