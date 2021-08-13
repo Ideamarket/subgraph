@@ -3,8 +3,8 @@
 	"license": "UNLICENSED",
 	"scripts": {
 		"build:test": "node build.js --test --branch %npm_config_branch% --branch $npm_config_branch --start-block %npm_config_startblock% --start-block $npm_config_startblock && graph build",
-		"build:kovan": "node build.js --kovan --branch %npm_config_branch% --branch $npm_config_branch --start-block %npm_config_startblock% --start-block $npm_config_startblock && graph build",
-		"build:kovan-avm": "node build.js --kovan-avm --branch %npm_config_branch% --branch $npm_config_branch --start-block %npm_config_startblock% --start-block $npm_config_startblock && graph build",
+		"build:test-avm-l1": "node build.js --test-avm-l1 --branch %npm_config_branch% --branch $npm_config_branch --start-block %npm_config_startblock% --start-block $npm_config_startblock && graph build",
+		"build:test-avm-l2": "node build.js --test-avm-l2 --branch %npm_config_branch% --branch $npm_config_branch --start-block %npm_config_startblock% --start-block $npm_config_startblock && graph build",
 		"build:rinkeby": "node build.js --rinkeby && graph build",
 		"build:mainnet": "node build.js --mainnet && graph build",
 		"deploy:test": "graph build && graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ Ideamarket/IdeamarketTEST",

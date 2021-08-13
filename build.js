@@ -72,15 +72,15 @@ const networks = {
 		realNetworkName: 'rinkeby',
 		startBlock: 8055800,
 	},
-	kovan: {
-		name: 'kovan',
-		realNetworkName: 'kovan',
-		startBlock: 24277000,
+	'test-avm-l1': {
+		name: 'test-avm-l1',
+		realNetworkName: 'rinkeby',
+		startBlock: 9107630,
 	},
-	'kovan-avm': {
-		name: 'kovan-avm',
-		realNetworkName: 'kovan',
-		startBlock: 128000,
+	'test-avm-l2': {
+		name: 'test-avm-l2',
+		realNetworkName: 'arbitrum-one',
+		startBlock: 9107630,
 	},
 }
 
@@ -98,11 +98,11 @@ async function main() {
 		} else if (process.argv[i] === '--test') {
 			network = networks.test
 			contracts = allContracts.evm
-		} else if (process.argv[i] === '--kovan') {
-			network = networks.kovan
+		} else if (process.argv[i] === '--test-avm-l1') {
+			network = networks['test-avm-l1']
 			contracts = allContracts.evm
-		} else if (process.argv[i] === '--kovan-avm') {
-			network = networks['kovan-avm']
+		} else if (process.argv[i] === '--test-avm-l2') {
+			network = networks['test-avm-l2']
 			contracts = allContracts.avm
 		} else if (process.argv[i] === '--mainnet') {
 			network = networks.mainnet
