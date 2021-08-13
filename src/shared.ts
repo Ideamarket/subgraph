@@ -4,6 +4,7 @@ import { BlockHandlerValues, FutureDayValueChange, IdeaToken } from '../res/gene
 export let ZERO_ADDRESS = Address.fromString('0x0000000000000000000000000000000000000000')
 export let ZERO = BigInt.fromI32(0)
 export let TEN_POW_18 = BigDecimal.fromString('1000000000000000000')
+export let TEN_POW_18_BIG_INT = BigInt.fromI32(10).pow(18)
 export let SECONDS_PER_DAY = 86400
 
 export function bigIntToBigDecimal(bigInt: BigInt, div: BigDecimal): BigDecimal {
