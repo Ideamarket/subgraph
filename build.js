@@ -79,7 +79,7 @@ const networks = {
 	},
 	'test-avm-l2': {
 		name: 'test-avm-l2',
-		realNetworkName: 'arbitrum-one',
+		realNetworkName: 'arbitrum-rinkeby',
 		startBlock: 9107630,
 	},
 }
